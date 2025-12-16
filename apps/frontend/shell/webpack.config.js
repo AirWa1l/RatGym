@@ -6,7 +6,7 @@ module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production';
 
   return {
-    entry: './src/index.ts',
+    entry: './src/index.tsx',
     mode: isProduction ? 'production' : 'development',
     devServer: {
       port: 3000,

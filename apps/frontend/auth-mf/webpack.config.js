@@ -1,12 +1,13 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ModuleFederationPlugin } = require('webpack').container;
+const webpack = require('webpack');
 const path = require('path');
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production';
 
   return {
-    entry: './src/index.ts',
+    entry: './src/index.tsx',
     mode: isProduction ? 'production' : 'development',
     devServer: {
       port: 3001,
@@ -40,13 +41,17 @@ module.exports = (env, argv) => {
       ],
     },
     plugins: [
+      new webpack.DefinePlugin({
+        'process.env.REACT_APP_USER_SERVICE_URL': JSON.stringify(
+          process.env.REACT_APP_USER_SERVICE_URL || 'http://localhost:3001'
+        ),
+      }),
       new ModuleFederationPlugin({
         name: 'authMf',
         filename: 'remoteEntry.js',
         exposes: {
           './AuthApp': './src/App',
           './LoginPage': './src/pages/LoginPage',
-          './RegisterPage': './src/pages/RegisterPage',
           './useAuth': './src/hooks/useAuth',
         },
         shared: {

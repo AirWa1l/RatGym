@@ -33,10 +33,7 @@ services:
       PORT: 3001
       NODE_ENV: production
       RABBITMQ_URL: amqp://rabbitmq:5672
-      JWT_SECRET: ${JWT_SECRET}
-      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
-      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
-      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
+      RABBITMQ_QUEUE: user_service
     depends_on:
       rabbitmq:
         condition: service_healthy

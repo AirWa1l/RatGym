@@ -10,7 +10,7 @@ export class SagaController {
 
   @Post('user-registration')
   async startUserRegistration(@Body() data: any) {
-    this.logger.log(`Starting user registration saga for: ${data.email}`);
+    this.logger.log(`Starting user registration saga for: ${data.username || 'user'}`);
     try {
       const saga = await this.sagaService.startUserRegistrationSaga(data);
       return {

@@ -5,16 +5,14 @@ export const useAuth = () => {
   const store = useAuthStore();
 
   useEffect(() => {
-    const unsubscribe = store.initAuth();
-    return () => unsubscribe();
+    store.initAuth();
   }, []);
 
   return {
     user: store.user,
     loading: store.loading,
     error: store.error,
-    accessToken: store.accessToken,
-    register: store.register,
+    token: store.token,
     login: store.login,
     logout: store.logout,
     clearError: store.clearError,

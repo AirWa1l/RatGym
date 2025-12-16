@@ -5,8 +5,6 @@ import { HomePage } from './pages/HomePage';
 
 // Lazy load microfrontends
 const LoginPage = lazy(() => import('authMf/LoginPage'));
-const RegisterPage = lazy(() => import('authMf/RegisterPage'));
-const useAuth = lazy(() => import('authMf/useAuth'));
 
 // Loading component
 const Loading = () => (
@@ -38,16 +36,14 @@ const App: React.FC = () => {
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    // Initialize auth
+    // Initialize auth from localStorage
     const initAuth = async () => {
       try {
-        // Import useAuth hook from authMf
-        const { useAuth: useAuthHook } = await import('authMf/useAuth');
-        // In a real implementation, we'd use the hook here
-        // For now, check localStorage
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-          // TODO: Validate token and get user
+        const savedUser = localStorage.getItem('ratgym_user');
+        const savedToken = localStorage.getItem('ratgym_token');
+        
+        if (savedUser && savedToken) {
+          setUser(JSON.parse(savedUser));
           setUser({ email: 'user@example.com' });
         }
       } catch (error) {
@@ -61,7 +57,8 @@ const App: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
+    localStorage.removeItem('ratgym_user');
+    localStorage.removeItem('ratgym_token');
     setUser(null);
   };
 
@@ -90,22 +87,7 @@ const App: React.FC = () => {
                   <Navigate to="/" replace />
                 ) : (
                   <LoginPage 
-                    onNavigateToRegister={() => window.location.href = '/register'}
                     onLoginSuccess={handleLoginSuccess}
-                  />
-                )
-              } 
-            />
-            
-            <Route 
-              path="/register" 
-              element={
-                user ? (
-                  <Navigate to="/" replace />
-                ) : (
-                  <RegisterPage 
-                    onNavigateToLogin={() => window.location.href = '/login'}
-                    onRegisterSuccess={handleLoginSuccess}
                   />
                 )
               } 

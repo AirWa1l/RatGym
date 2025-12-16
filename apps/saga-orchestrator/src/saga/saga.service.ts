@@ -26,7 +26,7 @@ export class SagaService {
       {
         name: SagaStep.REGISTER_USER,
         service: 'USER_SERVICE',
-        action: 'user.register',
+        action: 'user.login',
         compensationAction: 'user.delete',
         executed: false,
         compensated: false,

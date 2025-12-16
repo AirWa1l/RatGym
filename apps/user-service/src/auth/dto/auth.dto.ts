@@ -1,32 +1,11 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
-
-export class RegisterDto {
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
-
-  @IsString()
-  @MinLength(6)
-  @IsNotEmpty()
-  password: string;
-
-  @IsString()
-  @IsNotEmpty()
-  displayName: string;
-}
+import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
 export class LoginDto {
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
-
   @IsString()
   @IsNotEmpty()
-  password: string;
-}
+  username: string;
 
-export class VerifyTokenDto {
   @IsString()
-  @IsNotEmpty()
-  idToken: string;
+  @IsOptional()
+  password?: string;
 }

@@ -1,40 +1,19 @@
-# Shell - RatGym
+# Shell
 
-Aplicación shell que orquesta todos los microfrontends usando Module Federation.
+Aplicación principal que integra los microfrontends.
 
-## Características
+## Inicio
 
-- ✅ Module Federation de Webpack 5
-- ✅ Lazy loading de microfrontends
-- ✅ Routing centralizado
-- ✅ Navbar compartida
-- ✅ Gestión de autenticación global
-- ✅ Protected routes
-
-## Microfrontends Integrados
-
-1. **authMf** (puerto 3001)
-   - LoginPage
-   - RegisterPage
-   - useAuth hook
-
-2. **classesMf** (puerto 3002) - Próximamente
-3. **routinesMf** (puerto 3003) - Próximamente
-4. **sharedMf** (puerto 3004) - Próximamente
-
-## Configuración
-
-1. **Instalar dependencias:**
 ```bash
 npm install
-```
-
-2. **Ejecutar en desarrollo:**
-```bash
 npm run dev
 ```
 
-El shell se ejecutará en http://localhost:3000
+Puerto: 3000
+
+## Microfrontends
+
+- **authMf** (puerto 3001): Login con LocalStorage
 
 ## Desarrollo
 

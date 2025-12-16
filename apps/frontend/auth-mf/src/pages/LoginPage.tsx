@@ -3,15 +3,13 @@ import { useAuth } from '../hooks/useAuth';
 import { styles } from '../styles/authStyles';
 
 interface LoginPageProps {
-  onNavigateToRegister?: () => void;
   onLoginSuccess?: () => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ 
-  onNavigateToRegister,
   onLoginSuccess 
 }) => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login, loading, error, clearError } = useAuth();
 
@@ -20,7 +18,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     clearError();
     
     try {
-      await login(email, password);
+      await login(username, password);
       if (onLoginSuccess) {
         onLoginSuccess();
       }
@@ -32,8 +30,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h1 style={styles.title}>¡Bienvenido de nuevo!</h1>
-        <p style={styles.subtitle}>Inicia sesión en tu cuenta de RatGym</p>
+        <h1 style={styles.title}>¡Bienvenido a RatGym! 🐀💪</h1>
+        <p style={styles.subtitle}>Ingresa tu nombre de usuario para comenzar</p>
         
         {error && (
           <div style={styles.error}>
@@ -43,24 +41,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
-            <label htmlFor="email" style={styles.label}>
-              Correo electrónico
+            <label htmlFor="username" style={styles.label}>
+              Nombre de usuario
             </label>
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               style={styles.input}
-              placeholder="tu@email.com"
+              placeholder="Ingresa tu nombre"
               required
               disabled={loading}
+              autoFocus
             />
           </div>
 
           <div style={styles.inputGroup}>
             <label htmlFor="password" style={styles.label}>
-              Contraseña
+              Contraseña (opcional)
             </label>
             <input
               id="password"
@@ -68,8 +67,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={styles.input}
-              placeholder="••••••••"
-              required
+              placeholder="Opcional"
               disabled={loading}
             />
           </div>
@@ -82,21 +80,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             }}
             disabled={loading}
           >
-            {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+            {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
 
-        {onNavigateToRegister && (
-          <div style={styles.link}>
-            ¿No tienes una cuenta?{' '}
-            <a 
-              onClick={onNavigateToRegister}
-              style={styles.linkButton}
-            >
-              Regístrate
-            </a>
-          </div>
-        )}
+        <div style={styles.link}>
+          <p style={{ fontSize: '14px', color: '#666' }}>
+            Si es tu primera vez, automáticamente se creará tu usuario
+          </p>
+        </div>
       </div>
     </div>
   );

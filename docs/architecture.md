@@ -2,15 +2,13 @@
 
 ## Visión General
 
-RatGym es un sistema distribuido basado en microservicios y microfrontends diseñado para gestionar un gimnasio digital completo, incluyendo autenticación, rutinas, clases, nutrición y notificaciones.
+RatGym es un sistema distribuido basado en microservicios y microfrontends.
 
-## Principios de Diseño
+## Principios
 
 1. **Separación de Responsabilidades**: Cada microservicio tiene una única responsabilidad
-2. **Autonomía**: Los servicios pueden desplegarse independientemente
-3. **Comunicación Asíncrona**: Uso de eventos para desacoplamiento
-4. **Consistencia Eventual**: Aceptamos latencia para mejor escalabilidad
-5. **Microfronte nds**: Frontend modular con Module Federation
+2. **Comunicación Asíncrona**: RabbitMQ para mensajería entre servicios
+3. **Microfrontends**: Frontend modular con Module Federation
 
 ## Arquitectura de Backend
 
@@ -44,10 +42,11 @@ RatGym es un sistema distribuido basado en microservicios y microfrontends dise�
 ### Componentes del Backend
 
 #### 1. User Service
-**Responsabilidad**: Autenticación y gestión de usuarios
+**Responsabilidad**: Autenticación simple con username/password
 
 **Tecnologías**:
 - NestJS
+- Almacenamiento en memoria (Map)
 - Firebase Admin SDK
 - JWT
 - RabbitMQ

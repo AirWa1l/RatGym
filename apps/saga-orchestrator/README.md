@@ -1,52 +1,15 @@
-# Saga Orchestrator - RatGym
+# Saga Orchestrator
 
-Orquestador de transacciones distribuidas usando el patrón Saga.
+Orquestador de transacciones distribuidas.
 
-## Características
+## Inicio
 
-- ✅ Patrón Saga para transacciones distribuidas
-- ✅ Compensación automática en caso de fallo
-- ✅ Integración con RabbitMQ
-- ✅ Monitoreo de estado de sagas
-- ✅ Soporte para múltiples servicios
-
-## Sagas Implementadas
-
-### User Registration Saga
-
-Orquesta el proceso completo de registro de usuario:
-
-1. **Registrar usuario** (USER_SERVICE)
-   - Crea usuario en Firebase
-   - Compensación: Elimina usuario
-
-2. **Enviar email de bienvenida** (NOTIFICATION_SERVICE)
-   - Envía notificación de bienvenida
-   - Sin compensación (email ya enviado)
-
-## Endpoints
-
-### REST API
-
-- `POST /saga/user-registration` - Iniciar saga de registro
-- `GET /saga/status/:sagaId` - Consultar estado de saga
-- `GET /saga/all` - Listar todas las sagas
-
-### Message Patterns
-
-- `saga.user.registration` - Iniciar saga de registro de usuario
-
-## Configuración
-
-1. **Instalar dependencias:**
 ```bash
 npm install
+npm run start:dev
 ```
 
-2. **Configurar variables de entorno:**
-Copia `.env.example` a `.env` y configura las URLs de los servicios.
-
-## Scripts
+Puerto: 3010
 
 - `npm run start:dev` - Desarrollo
 - `npm run build` - Compilar

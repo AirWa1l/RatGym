@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
 import { useAuth } from './hooks/useAuth';
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<'login' | 'register'>('login');
   const { user } = useAuth();
 
   // If running standalone, use router
@@ -23,21 +21,7 @@ const App: React.FC = () => {
                 <Navigate to="/" replace />
               ) : (
                 <LoginPage 
-                  onNavigateToRegister={() => window.location.href = '/register'}
                   onLoginSuccess={() => window.location.href = '/'}
-                />
-              )
-            } 
-          />
-          <Route 
-            path="/register" 
-            element={
-              user ? (
-                <Navigate to="/" replace />
-              ) : (
-                <RegisterPage 
-                  onNavigateToLogin={() => window.location.href = '/login'}
-                  onRegisterSuccess={() => window.location.href = '/'}
                 />
               )
             } 
@@ -45,14 +29,13 @@ const App: React.FC = () => {
           <Route 
             path="/" 
             element={
-              currentPage === 'login' ? (
-                <LoginPage 
-                  onNavigateToRegister={() => setCurrentPage('register')}
-                />
+              user ? (
+                <div style={{ padding: '40px', textAlign: 'center' }}>
+                  <h1>Bienvenido, {user.username}!</h1>
+                  <p>Has iniciado sesión correctamente.</p>
+                </div>
               ) : (
-                <RegisterPage 
-                  onNavigateToLogin={() => setCurrentPage('login')}
-                />
+                <LoginPage />
               )
             } 
           />
@@ -62,15 +45,7 @@ const App: React.FC = () => {
   }
 
   // For module federation integration
-  return currentPage === 'login' ? (
-    <LoginPage 
-      onNavigateToRegister={() => setCurrentPage('register')}
-    />
-  ) : (
-    <RegisterPage 
-      onNavigateToLogin={() => setCurrentPage('login')}
-    />
-  );
+  return <LoginPage />;
 };
 
 export default App;
