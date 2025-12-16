@@ -7,7 +7,6 @@ Sistema de gestión de gimnasio con microservicios y microfrontends.
 ```bash
 # Instalar dependencias
 cd apps/user-service && npm install
-cd apps/frontend/auth-mf && npm install
 cd apps/frontend/shell && npm install
 
 # Iniciar RabbitMQ
@@ -15,7 +14,6 @@ docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-manageme
 
 # Iniciar servicios
 cd apps/user-service && npm run start:dev  # Puerto 3001
-cd apps/frontend/auth-mf && npm run dev    # Puerto 3001 (standalone)
 cd apps/frontend/shell && npm run dev      # Puerto 3000
 ```
 
@@ -29,19 +27,19 @@ cd apps/frontend/shell && npm run dev      # Puerto 3000
 
 ```
 apps/
-  ├── user-service/        # Auth con username/password local
+  ├── user-service/        # Auth con username local
   ├── saga-orchestrator/   # Transacciones distribuidas
   ├── frontend/
-  │   ├── auth-mf/        # Login (LocalStorage)
-  │   └── shell/          # App principal
+  │   └── shell/          # Dashboard principal
   └── ...                  # Otros servicios
 ```
 
 ## Características
 
-- Login simple con username (password opcional)
+- Login simple solo con username
 - Datos guardados en LocalStorage
-- Module Federation para microfrontends
+- Dashboard profesional con sidebar lateral
+- Widgets para microservicios (Rutinas, Clases, Nutrición, etc.)
 - RabbitMQ para comunicación entre servicios
 - Auto-creación de usuarios
 
@@ -50,6 +48,12 @@ apps/
 ### User Service
 - `POST /auth/login` - Login (auto-crea usuario si no existe)
 - `GET /auth/users` - Listar usuarios
+
+## Personalización
+
+Para agregar tu logo personalizado:
+1. Coloca tu imagen en: `apps/frontend/shell/public/logo.png`
+2. El logo aparecerá automáticamente en el navbar
 
 ## Documentación
 

@@ -43,9 +43,6 @@ module.exports = (env, argv) => {
       new ModuleFederationPlugin({
         name: 'shell',
         remotes: {
-          authMf: isProduction 
-            ? 'authMf@/auth/remoteEntry.js'
-            : 'authMf@http://localhost:3001/remoteEntry.js',
           classesMf: isProduction
             ? 'classesMf@/classes/remoteEntry.js'
             : 'classesMf@http://localhost:3002/remoteEntry.js',
