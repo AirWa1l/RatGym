@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: ratgym-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - ratgym-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # User Service
+  user-service:
+    build:
+      context: ./apps/user-service
+      dockerfile: Dockerfile
+    container_name: ratgym-user-service
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      NODE_ENV: production
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ratgym-network
+    restart: unless-stopped
+
+  # Saga Orchestrator
+  saga-orchestrator:
+    build:
+      context: ./apps/saga-orchestrator
+      dockerfile: Dockerfile
+    container_name: ratgym-saga-orchestrator
+    ports:
+      - "3010:3010"
+    environment:
+      PORT: 3010
+      NODE_ENV: production
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ratgym-network
+    restart: unless-stopped
+
+  # Auth Microfrontend
+  auth-mf:
+    build:
+      context: ./apps/frontend/auth-mf
+      dockerfile: Dockerfile
+    container_name: ratgym-auth-mf
+    ports:
+      - "3101:80"
+    networks:
+      - ratgym-network
+    restart: unless-stopped
+
+  # Shell
+  shell:
+    build:
+      context: ./apps/frontend/shell
+      dockerfile: Dockerfile
+    container_name: ratgym-shell
+    ports:
+      - "3000:80"
+    depends_on:
+      - auth-mf
+    networks:
+      - ratgym-network
+    restart: unless-stopped
+
+networks:
+  ratgym-network:
+    driver: bridge
+
+volumes:
+  rabbitmq_data:
