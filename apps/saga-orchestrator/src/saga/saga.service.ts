@@ -19,14 +19,18 @@ export class SagaService {
     @Inject('NOTIFICATION_SERVICE') private notificationServiceClient: ClientProxy,
   ) {}
 
-  async startUserRegistrationSaga(registrationData: any): Promise<SagaTransaction> {
+  /**
+   * Saga simplificado para registro de usuario
+   * Solo registra el usuario y envía notificación de bienvenida
+   */
+  async startUserRegistrationSaga(userData: { username: string }): Promise<SagaTransaction> {
     const sagaId = uuidv4();
     
     const steps: SagaStepDefinition[] = [
       {
         name: SagaStep.REGISTER_USER,
         service: 'USER_SERVICE',
-        action: 'user.login',
+        action: 'user.register',
         compensationAction: 'user.delete',
         executed: false,
         compensated: false,
@@ -34,7 +38,7 @@ export class SagaService {
       {
         name: SagaStep.SEND_WELCOME_EMAIL,
         service: 'NOTIFICATION_SERVICE',
-        action: 'notification.sendWelcomeEmail',
+        action: 'notification.sendWelcome',
         executed: false,
         compensated: false,
       },
@@ -46,20 +50,23 @@ export class SagaService {
       status: SagaStatus.PENDING,
       currentStep: 0,
       steps,
-      data: registrationData,
+      data: userData,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     this.transactions.set(sagaId, transaction);
-    this.logger.log(`Started user registration saga: ${sagaId}`);
+    this.logger.log(`[SAGA ${sagaId}] Started user registration for: ${userData.username}`);
 
-    // Execute saga
+    // Ejecutar saga de forma asíncrona
     await this.executeSaga(sagaId);
 
     return this.transactions.get(sagaId)!;
   }
 
+  /**
+   * Ejecuta todos los pasos del saga
+   */
   private async executeSaga(sagaId: string): Promise<void> {
     const transaction = this.transactions.get(sagaId);
     if (!transaction) {
@@ -70,24 +77,24 @@ export class SagaService {
     transaction.updatedAt = new Date();
 
     try {
-      // Execute each step
+      // Ejecutar cada paso secuencialmente
       for (let i = 0; i < transaction.steps.length; i++) {
         const step = transaction.steps[i];
         transaction.currentStep = i;
         
-        this.logger.log(`Executing step ${i + 1}/${transaction.steps.length}: ${step.name}`);
+        this.logger.log(`[SAGA ${sagaId}] Step ${i + 1}/${transaction.steps.length}: ${step.name}`);
 
         try {
           const result = await this.executeStep(step, transaction.data);
           step.executed = true;
           step.result = result;
           
-          this.logger.log(`Step ${step.name} completed successfully`);
+          this.logger.log(`[SAGA ${sagaId}] ✓ ${step.name} completed`);
         } catch (error) {
-          this.logger.error(`Step ${step.name} failed: ${error.message}`);
+          this.logger.error(`[SAGA ${sagaId}] ✗ ${step.name} failed: ${error.message}`);
           step.error = error.message;
           
-          // Compensation
+          // Compensar pasos anteriores
           await this.compensate(transaction, i);
           throw error;
         }
@@ -95,111 +102,138 @@ export class SagaService {
 
       transaction.status = SagaStatus.COMPLETED;
       transaction.updatedAt = new Date();
-      this.logger.log(`Saga ${sagaId} completed successfully`);
+      this.logger.log(`[SAGA ${sagaId}] ✓ Completed successfully`);
     } catch (error) {
       transaction.status = SagaStatus.FAILED;
       transaction.error = error.message;
       transaction.updatedAt = new Date();
-      this.logger.error(`Saga ${sagaId} failed: ${error.message}`);
+      this.logger.error(`[SAGA ${sagaId}] ✗ Failed: ${error.message}`);
       throw error;
     }
   }
 
-  private async executeStep(
-    step: SagaStepDefinition, 
-    data: any
-  ): Promise<any> {
-    let client: ClientProxy;
-
-    switch (step.service) {
-      case 'USER_SERVICE':
-        client = this.userServiceClient;
-        break;
-      case 'NOTIFICATION_SERVICE':
-        client = this.notificationServiceClient;
-        break;
-      default:
-        throw new Error(`Unknown service: ${step.service}`);
-    }
-
+  /**
+   * Ejecuta un paso individual del saga
+   */
+  private async executeStep(step: SagaStepDefinition, data: any): Promise<any> {
     try {
-      const result = await lastValueFrom(
-        client.send(step.action, data)
-      );
+      let client: ClientProxy;
+      
+      // Seleccionar el cliente correcto
+      switch (step.service) {
+        case 'USER_SERVICE':
+          client = this.userServiceClient;
+          break;
+        case 'NOTIFICATION_SERVICE':
+          client = this.notificationServiceClient;
+          break;
+        default:
+          throw new Error(`Unknown service: ${step.service}`);
+      }
+
+      // Enviar mensaje y esperar respuesta (con timeout de 5 segundos)
+      const response$ = client.send(step.action, data);
+      const result = await lastValueFrom(response$);
+      
       return result;
     } catch (error) {
-      this.logger.error(`Error executing ${step.action}: ${error.message}`);
+      this.logger.error(`Step execution error: ${error.message}`);
       throw error;
     }
   }
 
-  private async compensate(
-    transaction: SagaTransaction, 
-    failedStepIndex: number
-  ): Promise<void> {
-    this.logger.log(`Starting compensation for saga ${transaction.id}`);
-    transaction.status = SagaStatus.COMPENSATING;
+  /**
+   * Compensa (rollback) los pasos ejecutados cuando algo falla
+   */
+  private async compensate(transaction: SagaTransaction, failedStepIndex: number): Promise<void> {
+    this.logger.warn(`[SAGA ${transaction.id}] Starting compensation from step ${failedStepIndex}`);
 
-    // Compensate in reverse order
+    // Compensar en orden inverso
     for (let i = failedStepIndex - 1; i >= 0; i--) {
       const step = transaction.steps[i];
       
-      if (step.executed && !step.compensated && step.compensationAction) {
-        this.logger.log(`Compensating step: ${step.name}`);
+      // Solo compensar si tiene acción de compensación y fue ejecutado
+      if (step.compensationAction && step.executed && !step.compensated) {
+        this.logger.log(`[SAGA ${transaction.id}] Compensating step: ${step.name}`);
         
         try {
           await this.executeCompensation(step, transaction.data);
           step.compensated = true;
-          this.logger.log(`Step ${step.name} compensated successfully`);
+          this.logger.log(`[SAGA ${transaction.id}] ✓ ${step.name} compensated`);
         } catch (error) {
-          this.logger.error(`Compensation failed for ${step.name}: ${error.message}`);
-          // Continue compensating other steps even if one fails
+          this.logger.error(`[SAGA ${transaction.id}] ✗ Compensation failed for ${step.name}: ${error.message}`);
+          // Continuar con otras compensaciones aunque una falle
         }
       }
     }
 
     transaction.status = SagaStatus.COMPENSATED;
     transaction.updatedAt = new Date();
-    this.logger.log(`Compensation completed for saga ${transaction.id}`);
   }
 
-  private async executeCompensation(
-    step: SagaStepDefinition,
-    data: any
-  ): Promise<void> {
-    if (!step.compensationAction) {
-      return;
+  /**
+   * Ejecuta una acción de compensación
+   */
+  private async executeCompensation(step: SagaStepDefinition, data: any): Promise<void> {
+    try {
+      let client: ClientProxy;
+      
+      switch (step.service) {
+        case 'USER_SERVICE':
+          client = this.userServiceClient;
+          break;
+        case 'NOTIFICATION_SERVICE':
+          client = this.notificationServiceClient;
+          break;
+        default:
+          throw new Error(`Unknown service: ${step.service}`);
+      }
+
+      const response$ = client.send(step.compensationAction!, data);
+      await lastValueFrom(response$);
+    } catch (error) {
+      this.logger.error(`Compensation execution error: ${error.message}`);
+      throw error;
     }
-
-    let client: ClientProxy;
-
-    switch (step.service) {
-      case 'USER_SERVICE':
-        client = this.userServiceClient;
-        break;
-      case 'NOTIFICATION_SERVICE':
-        client = this.notificationServiceClient;
-        break;
-      default:
-        throw new Error(`Unknown service: ${step.service}`);
-    }
-
-    // Use result from the original execution for compensation
-    const compensationData = {
-      ...data,
-      ...step.result,
-    };
-
-    await lastValueFrom(
-      client.send(step.compensationAction, compensationData)
-    );
   }
 
+  /**
+   * Obtiene el estado de una transacción
+   */
   getSagaStatus(sagaId: string): SagaTransaction | undefined {
     return this.transactions.get(sagaId);
   }
 
+  /**
+   * Lista todas las transacciones
+   */
   getAllSagas(): SagaTransaction[] {
     return Array.from(this.transactions.values());
+  }
+
+  /**
+   * Limpia transacciones completadas más antiguas que X horas
+   */
+  cleanupOldTransactions(hoursOld: number = 24): number {
+    const cutoffTime = new Date(Date.now() - hoursOld * 60 * 60 * 1000);
+    let cleaned = 0;
+
+    for (const [id, transaction] of this.transactions.entries()) {
+      if (
+        (transaction.status === SagaStatus.COMPLETED || 
+         transaction.status === SagaStatus.FAILED ||
+         transaction.status === SagaStatus.COMPENSATED) &&
+        transaction.updatedAt < cutoffTime
+      ) {
+        this.transactions.delete(id);
+        cleaned++;
+      }
+    }
+
+    if (cleaned > 0) {
+      this.logger.log(`Cleaned up ${cleaned} old transactions`);
+    }
+
+    return cleaned;
   }
 }

@@ -1,60 +1,102 @@
 # RatGym 🐀💪
 
-Sistema de gestión de gimnasio con microservicios y microfrontends.
+Sistema de gestión de gimnasio con arquitectura de microservicios y microfrontends.
 
-## Inicio Rápido
+## 🚀 Inicio Rápido
 
-```bash
-# Instalar dependencias
-cd apps/user-service && npm install
-cd apps/frontend/shell && npm install
-
-# Iniciar RabbitMQ
-docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-management
-
-# Iniciar servicios
-cd apps/user-service && npm run start:dev  # Puerto 3001
-cd apps/frontend/shell && npm run dev      # Puerto 3000
+### Opción 1: Script Automático (Windows)
+```powershell
+.\start.ps1
 ```
 
-## Acceso
+### Opción 2: Manual
+```bash
+# 1. Iniciar RabbitMQ
+docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-management
 
-- **Frontend**: http://localhost:3000
-- **User Service**: http://localhost:3001
-- **RabbitMQ**: http://localhost:15672 (guest/guest)
+# 2. Instalar dependencias
+cd apps/user-service && npm install
+cd apps/saga-orchestrator && npm install
+cd apps/frontend/shell && npm install
 
-## Estructura
+# 3. Iniciar servicios (3 terminales)
+cd apps/user-service && npm run start:dev       # Terminal 1 - Puerto 3001
+cd apps/saga-orchestrator && npm run start:dev  # Terminal 2 - Puerto 3005
+cd apps/frontend/shell && npm run dev           # Terminal 3 - Puerto 3000
+```
+
+### Opción 3: Docker Compose
+```bash
+docker-compose up --build
+```
+
+### Opción 4: Kubernetes
+Ver [QUICKSTART.md](QUICKSTART.md#kubernetes-opción-3---producción)
+
+## 🌐 Acceso
+
+| Servicio | URL | Descripción |
+|----------|-----|-------------|
+| **Frontend** | http://localhost:3000 | Dashboard principal |
+| **User Service** | http://localhost:3001 | Auth y usuarios |
+| **Saga Orchestrator** | http://localhost:3005 | Transacciones distribuidas |
+| **RabbitMQ UI** | http://localhost:15672 | Management Console (guest/guest) |
+
+## 📁 Estructura
 
 ```
 apps/
-  ├── user-service/        # Auth con username local
-  ├── saga-orchestrator/   # Transacciones distribuidas
+  ├── user-service/          # Auth con username local (in-memory)
+  ├── saga-orchestrator/     # Orquestación de sagas distribuidas
   ├── frontend/
-  │   └── shell/          # Dashboard principal
-  └── ...                  # Otros servicios
+  │   └── shell/            # Dashboard profesional React
+  └── [otros servicios]/    # routine, class, nutrition, etc.
+infra/
+  ├── k8s/                  # Configuraciones Kubernetes
+  └── docker/               # Configuraciones Docker
 ```
 
-## Características
+## ✨ Características
 
-- Login simple solo con username
-- Datos guardados en LocalStorage
-- Dashboard profesional con sidebar lateral
-- Widgets para microservicios (Rutinas, Clases, Nutrición, etc.)
-- RabbitMQ para comunicación entre servicios
-- Auto-creación de usuarios
+- ✅ Login simplificado (solo username, sin contraseña)
+- ✅ Almacenamiento local con LocalStorage
+- ✅ Dashboard profesional estilo SmartFit con sidebar
+- ✅ 6 widgets preparados para microservicios
+- ✅ Arquitectura SAGA para transacciones distribuidas
+- ✅ RabbitMQ para comunicación asíncrona
+- ✅ Module Federation para microfrontends
+- ✅ Auto-creación de usuarios
+- ✅ Docker & Kubernetes ready
 
-## Endpoints
+## 🎨 Personalización
 
-### User Service
-- `POST /auth/login` - Login (auto-crea usuario si no existe)
-- `GET /auth/users` - Listar usuarios
-
-## Personalización
-
-Para agregar tu logo personalizado:
+**Agregar logo personalizado:**
 1. Coloca tu imagen en: `apps/frontend/shell/public/logo.png`
 2. El logo aparecerá automáticamente en el navbar
 
-## Documentación
+## 📡 API Endpoints
 
-Ver archivos individuales README.md en cada servicio.
+### User Service (puerto 3001)
+- `POST /auth/login` - Login (auto-crea usuario)
+- `GET /auth/users` - Listar usuarios
+- `GET /auth/health` - Health check
+
+### Saga Orchestrator (puerto 3005)
+- `POST /saga/user-registration` - Iniciar saga de registro
+- `GET /saga/status/:sagaId` - Estado de una saga
+- `GET /saga/all` - Listar todas las sagas
+- `POST /saga/cleanup` - Limpiar sagas antiguas
+
+## 📚 Documentación
+
+- [Inicio Rápido Detallado](QUICKSTART.md)
+- [Arquitectura](docs/architecture.md)
+- [Decisiones de Diseño](docs/decisions.md)
+- [Sagas](docs/sagas.md)
+
+## 🛠️ Tecnologías
+
+- **Backend**: NestJS 10, RabbitMQ, TypeScript
+- **Frontend**: React 18, Webpack Module Federation
+- **Orquestación**: Kubernetes, Docker Compose
+- **Mensajería**: RabbitMQ 3.12

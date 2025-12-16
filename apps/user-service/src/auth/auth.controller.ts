@@ -31,4 +31,14 @@ export class AuthController {
   async handleGetUserEvent(@Payload() data: { username: string }) {
     return this.authService.getUserByUsername(data.username);
   }
+
+  @Get('health')
+  async health() {
+    return {
+      status: 'ok',
+      service: 'user-service',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+    };
+  }
 }

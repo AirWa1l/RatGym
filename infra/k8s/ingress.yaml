@@ -39,18 +39,9 @@ spec:
           service:
             name: saga-orchestrator
             port:
-              number: 3010
+              number: 3005
       
-      # Frontend - Auth MF
-      - path: /auth(/|$)(.*)
-        pathType: Prefix
-        backend:
-          service:
-            name: auth-mf
-            port:
-              number: 3001
-      
-      # Frontend - Shell
+      # Frontend - Shell (Main Dashboard)
       - path: /(/|$)(.*)
         pathType: Prefix
         backend:
