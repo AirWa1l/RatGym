@@ -12,6 +12,22 @@ spec:
       labels:
         app: llama
     spec:
+
+      initContainers:
+      - name: pull-model
+        image: ollama/ollama:latest
+        command:
+          - sh
+          - -c
+          - |
+            ollama serve &
+            sleep 5
+            ollama pull llama3.2
+        volumeMounts:
+          - name: ollama-data
+            mountPath: /root/.ollama
+
+      # 🔹 CONTENEDOR PRINCIPAL
       containers:
         - name: llama
           image: ollama/ollama:latest
@@ -21,6 +37,14 @@ spec:
             limits:
               memory: "4Gi"
               cpu: "2"
+          volumeMounts:
+            - name: ollama-data
+              mountPath: /root/.ollama
+
+      # 🔹 VOLUMEN COMPARTIDO
+      volumes:
+        - name: ollama-data
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -32,3 +56,5 @@ spec:
   ports:
     - port: 11434
       targetPort: 11434
+  type: ClusterIP
+
