@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { RoutineWidget } from '../components/RoutineWidget';
+
+type Section = 'dashboard' | 'rutinas' | 'clases' | 'nutricion' | 'progreso' | 'notificaciones' | 'configuracion';
 
 export const HomePage: React.FC = () => {
   const [username, setUsername] = useState<string>('');
@@ -6,6 +9,7 @@ export const HomePage: React.FC = () => {
     localStorage.getItem('ratgym_username')
   );
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeSection, setActiveSection] = useState<Section>('dashboard');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -238,6 +242,7 @@ export const HomePage: React.FC = () => {
           {menuItems.map((item, index) => (
             <div
               key={index}
+              onClick={() => setActiveSection(item.section)}
               style={{
                 padding: sidebarOpen ? '14px 20px' : '14px',
                 display: 'flex',
@@ -245,14 +250,14 @@ export const HomePage: React.FC = () => {
                 gap: '16px',
                 cursor: 'pointer',
                 transition: 'background-color 0.2s',
-                backgroundColor: index === 0 ? '#1a1a1a' : 'transparent',
-                borderLeft: index === 0 ? '4px solid #fff' : '4px solid transparent',
+                backgroundColor: activeSection === item.section ? '#1a1a1a' : 'transparent',
+                borderLeft: activeSection === item.section ? '4px solid #fff' : '4px solid transparent',
               }}
               onMouseEnter={(e) => {
-                if (index !== 0) e.currentTarget.style.backgroundColor = '#1a1a1a';
+                if (activeSection !== item.section) e.currentTarget.style.backgroundColor = '#1a1a1a';
               }}
               onMouseLeave={(e) => {
-                if (index !== 0) e.currentTarget.style.backgroundColor = 'transparent';
+                if (activeSection !== item.section) e.currentTarget.style.backgroundColor = 'transparent';
               }}
             >
               <span style={{ fontSize: '20px', flexShrink: 0 }}>{item.icon}</span>
@@ -296,6 +301,22 @@ export const HomePage: React.FC = () => {
         transition: 'margin-left 0.3s ease',
         padding: '40px',
       }}>
+        {/* Renderizar según la sección activa */}
+        {activeSection === 'dashboard' && renderDashboard()}
+        {activeSection === 'rutinas' && renderRutinas()}
+        {activeSection === 'clases' && renderComingSoon('Clases', '🎯', 'Próximas sesiones grupales')}
+        {activeSection === 'nutricion' && renderComingSoon('Nutrición', '🥗', 'Plan alimenticio personalizado')}
+        {activeSection === 'progreso' && renderComingSoon('Progreso', '📊', 'Tu rendimiento y estadísticas')}
+        {activeSection === 'notificaciones' && renderComingSoon('Notificaciones', '🔔', 'Alertas y recordatorios')}
+        {activeSection === 'configuracion' && renderComingSoon('Configuración', '⚙️', 'Ajustes de tu cuenta')}
+      </div>
+    </div>
+  );
+
+  // Renderizar Dashboard
+  function renderDashboard() {
+    return (
+      <>
         {/* Header */}
         <div style={{ marginBottom: '40px' }}>
           <h1 style={{
@@ -344,120 +365,143 @@ export const HomePage: React.FC = () => {
           ))}
         </div>
 
-        {/* Widgets Grid */}
+        {/* Quick Access Cards */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-          gap: '24px',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '20px',
         }}>
-          {widgets.map((widget, index) => (
-            <div
-              key={index}
-              style={{
-                backgroundColor: '#fff',
-                borderRadius: '8px',
-                border: '1px solid #e0e0e0',
-                overflow: 'hidden',
-                transition: 'box-shadow 0.2s',
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'}
-              onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
-            >
-              {/* Widget Header */}
-              <div style={{
-                padding: '20px 24px',
-                borderBottom: '1px solid #f0f0f0',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-              }}>
-                <div style={{ fontSize: '24px' }}>{widget.icon}</div>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#000',
-                    marginBottom: '2px',
-                  }}>
-                    {widget.title}
-                  </h3>
-                  <p style={{ fontSize: '13px', color: '#999', margin: 0 }}>
-                    {widget.subtitle}
-                  </p>
-                </div>
-              </div>
+          {/* Widget completo de Rutinas */}
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '8px',
+            border: '1px solid #e0e0e0',
+            overflow: 'hidden',
+            cursor: 'pointer',
+          }}
+            onClick={() => setActiveSection('rutinas')}
+          >
+            <RoutineWidget userId={currentUser || 'guest'} compact={true} />
+          </div>
 
-              {/* Widget Content */}
-              <div style={{
-                padding: '24px',
-                minHeight: '120px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#fafafa',
-              }}>
-                <div style={{
-                  textAlign: 'center',
-                  color: '#999',
-                  fontSize: '14px',
-                }}>
-                  <div style={{ fontSize: '40px', marginBottom: '12px', opacity: 0.3 }}>
-                    {widget.icon}
-                  </div>
-                  <div>Esperando integración de microservicio</div>
-                </div>
-              </div>
+          <div
+            onClick={() => setActiveSection('clases')}
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: '8px',
+              padding: '24px',
+              border: '1px solid #e0e0e0',
+              cursor: 'pointer',
+              transition: 'box-shadow 0.2s',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)'}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
+          >
+            <div style={{ fontSize: '40px', marginBottom: '16px' }}>🎯</div>
+            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#000' }}>Clases</h3>
+            <p style={{ color: '#666', margin: 0 }}>Reserva sesiones grupales</p>
+          </div>
 
-              {/* Widget Footer */}
-              <div style={{
-                padding: '16px 24px',
-                backgroundColor: '#f8f9fa',
-                borderTop: '1px solid #f0f0f0',
-              }}>
-                <button
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#000',
-                    backgroundColor: 'transparent',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#000';
-                    e.currentTarget.style.color = '#fff';
-                    e.currentTarget.style.borderColor = '#000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = '#000';
-                    e.currentTarget.style.borderColor = '#e0e0e0';
-                  }}
-                >
-                  Ver más →
-                </button>
-              </div>
-            </div>
-          ))}
+          <div
+            onClick={() => setActiveSection('nutricion')}
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: '8px',
+              padding: '24px',
+              border: '1px solid #e0e0e0',
+              cursor: 'pointer',
+              transition: 'box-shadow 0.2s',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)'}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
+          >
+            <div style={{ fontSize: '40px', marginBottom: '16px' }}>🥗</div>
+            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#000' }}>Nutrición</h3>
+            <p style={{ color: '#666', margin: 0 }}>Tu plan alimenticio</p>
+          </div>
         </div>
-      </div>
-    </div>
-  );
+      </>
+    );
+  }
+
+  // Renderizar página completa de Rutinas
+  function renderRutinas() {
+    return (
+      <>
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{
+            fontSize: '32px',
+            fontWeight: '700',
+            color: '#000',
+            marginBottom: '8px',
+          }}>
+            Mis Rutinas
+          </h1>
+          <p style={{ fontSize: '16px', color: '#666' }}>
+            Gestiona tus rutinas de entrenamiento
+          </p>
+        </div>
+
+        <div style={{
+          backgroundColor: '#fff',
+          borderRadius: '12px',
+          border: '1px solid #e0e0e0',
+          overflow: 'hidden',
+          minHeight: '600px',
+        }}>
+          <RoutineWidget userId={currentUser || 'guest'} />
+        </div>
+      </>
+    );
+  }
+
+  // Renderizar páginas "Próximamente"
+  function renderComingSoon(title: string, icon: string, description: string) {
+    return (
+      <>
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{
+            fontSize: '32px',
+            fontWeight: '700',
+            color: '#000',
+            marginBottom: '8px',
+          }}>
+            {title}
+          </h1>
+          <p style={{ fontSize: '16px', color: '#666' }}>
+            {description}
+          </p>
+        </div>
+
+        <div style={{
+          backgroundColor: '#fff',
+          borderRadius: '12px',
+          border: '1px solid #e0e0e0',
+          padding: '80px 40px',
+          textAlign: 'center',
+        }}>
+          <div style={{ fontSize: '80px', marginBottom: '24px', opacity: 0.3 }}>{icon}</div>
+          <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '12px' }}>
+            Próximamente
+          </h2>
+          <p style={{ color: '#666', maxWidth: '400px', margin: '0 auto' }}>
+            Esta sección está en desarrollo. Pronto podrás acceder a todas las funcionalidades de {title.toLowerCase()}.
+          </p>
+        </div>
+      </>
+    );
+  }
 };
 
 // Datos del menú
-const menuItems = [
-  { icon: '🏠', label: 'Dashboard' },
-  { icon: '💪', label: 'Mis Rutinas' },
-  { icon: '🎯', label: 'Clases' },
-  { icon: '🥗', label: 'Nutrición' },
-  { icon: '📊', label: 'Progreso' },
-  { icon: '🔔', label: 'Notificaciones' },
-  { icon: '⚙️', label: 'Configuración' },
+const menuItems: { icon: string; label: string; section: Section }[] = [
+  { icon: '🏠', label: 'Dashboard', section: 'dashboard' },
+  { icon: '💪', label: 'Mis Rutinas', section: 'rutinas' },
+  { icon: '🎯', label: 'Clases', section: 'clases' },
+  { icon: '🥗', label: 'Nutrición', section: 'nutricion' },
+  { icon: '📊', label: 'Progreso', section: 'progreso' },
+  { icon: '🔔', label: 'Notificaciones', section: 'notificaciones' },
+  { icon: '⚙️', label: 'Configuración', section: 'configuracion' },
 ];
 
 // Tarjetas de estadísticas
@@ -466,14 +510,4 @@ const statsCards = [
   { icon: '⏱️', value: '0h', label: 'Tiempo Total' },
   { icon: '🎯', value: '0', label: 'Objetivos' },
   { icon: '📈', value: '0%', label: 'Progreso' },
-];
-
-// Widgets
-const widgets = [
-  { icon: '💪', title: 'Rutinas', subtitle: 'Tus entrenamientos personalizados' },
-  { icon: '🎯', title: 'Clases', subtitle: 'Próximas sesiones grupales' },
-  { icon: '🥗', title: 'Nutrición', subtitle: 'Plan alimenticio' },
-  { icon: '📊', title: 'Estadísticas', subtitle: 'Tu rendimiento' },
-  { icon: '🔔', title: 'Notificaciones', subtitle: 'Alertas y recordatorios' },
-  { icon: '✨', title: 'Recomendaciones', subtitle: 'Sugerencias para ti' },
 ];

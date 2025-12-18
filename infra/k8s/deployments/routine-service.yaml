@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: routine-service
+  labels:
+    app: routine-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: routine-service
+  template:
+    metadata:
+      labels:
+        app: routine-service
+    spec:
+      containers:
+      - name: routine-service
+        image: ratgym/routine-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3002
+        env:
+        - name: PORT
+          value: "3002"
+        - name: NODE_ENV
+          value: "production"
+        - name: RABBITMQ_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ratgym-config
+              key: RABBITMQ_URL
+        - name: RABBITMQ_QUEUE
+          valueFrom:
+            configMapKeyRef:
+              name: ratgym-config
+              key: ROUTINE_SERVICE_QUEUE
+        - name: USER_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ratgym-config
+              key: USER_SERVICE_URL
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3002
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3002
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: routine-service
+  labels:
+    app: routine-service
+spec:
+  selector:
+    app: routine-service
+  ports:
+    - protocol: TCP
+      port: 3002
+      targetPort: 3002
+      name: http
+  type: ClusterIP

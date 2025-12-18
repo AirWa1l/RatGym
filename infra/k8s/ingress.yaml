@@ -41,6 +41,24 @@ spec:
             port:
               number: 3005
       
+      # Routine Service (exercises and routines)
+      - path: /routines(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: routine-service
+            port:
+              number: 3002
+      
+      # Routine Service - Exercises endpoint
+      - path: /exercises(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: routine-service
+            port:
+              number: 3002
+      
       # Frontend - Shell (Main Dashboard)
       - path: /(/|$)(.*)
         pathType: Prefix
