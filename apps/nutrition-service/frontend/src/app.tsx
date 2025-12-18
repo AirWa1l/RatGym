@@ -3,12 +3,13 @@ import './App.css';
 
 function App() {
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>🍎 Microfrontend de Nutrición</h1>
+    <div className="app-shell">
+      <h1 className="app-title">🍎 Nutrición</h1>
       <NutritionWidget />
     </div>
   );
 }
 
 export default App;
+
 

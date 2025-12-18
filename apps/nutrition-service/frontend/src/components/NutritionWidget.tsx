@@ -3,18 +3,17 @@ import {
   createNutritionPlan,
   NutritionResponse,
 } from '../services/nutrition.service';
+import './nutritionWidget.css';
 
 export default function NutritionWidget() {
   const [plan, setPlan] = useState<NutritionResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Inputs
   const [weight, setWeight] = useState(75);
   const [height, setHeight] = useState(175);
   const [age, setAge] = useState(22);
-  const [objective, setObjective] = useState<
-    'LOSE_WEIGHT' | 'GAIN_MUSCLE' | 'MAINTAIN'
-  >('GAIN_MUSCLE');
+  const [objective, setObjective] =
+    useState<'LOSE_WEIGHT' | 'GAIN_MUSCLE' | 'MAINTAIN'>('GAIN_MUSCLE');
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -26,58 +25,52 @@ export default function NutritionWidget() {
         objective,
       });
       setPlan(result);
-    } catch (error) {
-      alert('Error generating nutrition plan');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ border: '1px solid #ccc', padding: '1.5rem' }}>
-      <h2>🍎 Nutrición</h2>
+    <div className="nutrition-card">
+      <div className="nutrition-header">
+        <span>🍎</span>
+        <span className="nutrition-title">Nutrición</span>
+      </div>
+      <div className="nutrition-subtitle">Plan alimenticio personalizado</div>
 
-      {/* Inputs */}
-      <div style={{ display: 'grid', gap: '0.5rem' }}>
+      <div className="nutrition-form">
         <label>
-          Peso (kg):
+          Peso (kg)
           <input
             type="number"
             value={weight}
-            onChange={(e) => setWeight(Number(e.target.value))}
+            onChange={(e) => setWeight(+e.target.value)}
           />
         </label>
 
         <label>
-          Altura (cm):
+          Altura (cm)
           <input
             type="number"
             value={height}
-            onChange={(e) => setHeight(Number(e.target.value))}
+            onChange={(e) => setHeight(+e.target.value)}
           />
         </label>
 
         <label>
-          Edad:
+          Edad
           <input
             type="number"
             value={age}
-            onChange={(e) => setAge(Number(e.target.value))}
+            onChange={(e) => setAge(+e.target.value)}
           />
         </label>
 
         <label>
-          Objetivo:
+          Objetivo
           <select
             value={objective}
-            onChange={(e) =>
-              setObjective(
-                e.target.value as
-                  | 'LOSE_WEIGHT'
-                  | 'GAIN_MUSCLE'
-                  | 'MAINTAIN'
-              )
-            }
+            onChange={(e) => setObjective(e.target.value as any)}
           >
             <option value="LOSE_WEIGHT">Bajar de peso</option>
             <option value="GAIN_MUSCLE">Ganar músculo</option>
@@ -87,21 +80,35 @@ export default function NutritionWidget() {
       </div>
 
       <button
+        className="nutrition-button"
         onClick={handleGenerate}
         disabled={loading}
-        style={{ marginTop: '1rem' }}
       >
         {loading ? 'Generando...' : 'Generar plan'}
       </button>
 
-      {/* Resultado */}
       {plan && (
-        <div style={{ marginTop: '1rem' }}>
-          <p><b>Calorías:</b> {plan.calories}</p>
-          <p><b>Proteínas:</b> {plan.protein} g</p>
-          <p><b>Carbohidratos:</b> {plan.carbs} g</p>
-          <p><b>Grasas:</b> {plan.fat} g</p>
-          <p><b>Recomendación:</b> {plan.recommendation}</p>
+        <div className="nutrition-result">
+          <div className="nutrition-metric">
+            <span>Calorías</span>
+            <b>{plan.calories} kcal</b>
+          </div>
+          <div className="nutrition-metric">
+            <span>Proteínas</span>
+            <b>{plan.protein} g</b>
+          </div>
+          <div className="nutrition-metric">
+            <span>Carbohidratos</span>
+            <b>{plan.carbs} g</b>
+          </div>
+          <div className="nutrition-metric">
+            <span>Grasas</span>
+            <b>{plan.fat} g</b>
+          </div>
+
+          <div className="nutrition-recommendation">
+            {plan.recommendation}
+          </div>
         </div>
       )}
     </div>
