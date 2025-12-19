@@ -58,7 +58,6 @@ spec:
             name: routine-service
             port:
               number: 3002
-      
       # Frontend - Shell (Main Dashboard)
       - path: /(/|$)(.*)
         pathType: Prefix
@@ -67,3 +66,12 @@ spec:
             name: shell
             port:
               number: 3000
+              
+      # Nutrition Service
+      - path: /nutrition(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: nutrition-service
+            port:
+              number: 3004

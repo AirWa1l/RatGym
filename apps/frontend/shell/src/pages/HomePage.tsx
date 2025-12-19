@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { RoutineWidget } from '../components/RoutineWidget';
+import NutritionWidget from '../components/NutritionWidget';
+
 
 type Section = 'dashboard' | 'rutinas' | 'clases' | 'nutricion' | 'progreso' | 'notificaciones' | 'configuracion';
 
@@ -305,7 +307,7 @@ export const HomePage: React.FC = () => {
         {activeSection === 'dashboard' && renderDashboard()}
         {activeSection === 'rutinas' && renderRutinas()}
         {activeSection === 'clases' && renderComingSoon('Clases', '🎯', 'Próximas sesiones grupales')}
-        {activeSection === 'nutricion' && renderComingSoon('Nutrición', '🥗', 'Plan alimenticio personalizado')}
+        {activeSection === 'nutricion' && renderNutricion()}
         {activeSection === 'progreso' && renderComingSoon('Progreso', '📊', 'Tu rendimiento y estadísticas')}
         {activeSection === 'notificaciones' && renderComingSoon('Notificaciones', '🔔', 'Alertas y recordatorios')}
         {activeSection === 'configuracion' && renderComingSoon('Configuración', '⚙️', 'Ajustes de tu cuenta')}
@@ -454,6 +456,40 @@ export const HomePage: React.FC = () => {
       </>
     );
   }
+
+  function renderNutricion() {
+    return (
+      <>
+        <div style={{ marginBottom: '32px' }}>
+          <h1
+            style={{
+              fontSize: '32px',
+              fontWeight: '700',
+              color: '#000',
+              marginBottom: '8px',
+            }}
+          >
+            Nutrición
+          </h1>
+          <p style={{ fontSize: '16px', color: '#666' }}>
+            Tu plan alimenticio personalizado
+          </p>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            border: '1px solid #e0e0e0',
+            padding: '24px',
+          }}
+        >
+          <NutritionWidget userId={currentUser || 'guest'} />
+        </div>
+      </>
+    );
+  }
+
 
   // Renderizar páginas "Próximamente"
   function renderComingSoon(title: string, icon: string, description: string) {

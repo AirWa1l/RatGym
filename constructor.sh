@@ -1,62 +1,67 @@
-#!/bin/bash
-set -e
+# ===============================
+# RatGym - Deploy Kubernetes
+# ===============================
 
-echo "🚀 Iniciando entorno IA + Nutrition Service"
+Write-Host "🔧 Configurando Docker para Minikube..." -ForegroundColor Cyan
+minikube docker-env | Invoke-Expression
 
-# -----------------------------
-# 1️⃣ Verificar Kubernetes
-# -----------------------------
-echo "🔍 Verificando cluster..."
-kubectl version --client > /dev/null
+# ===============================
+# 🐳 Construir imágenes
+# ===============================
 
-if ! kubectl get nodes > /dev/null 2>&1; then
-  echo "❌ Kubernetes no está activo"
-  exit 1
-fi
+Write-Host "🐳 Construyendo user-service..." -ForegroundColor Yellow
+docker build -t ratgym/user-service:latest ./apps/user-service
 
-# -----------------------------
-# 2️⃣ Build imagen nutrition-service (backend)
-# -----------------------------
-echo "🐳 Construyendo imagen nutrition-service..."
+Write-Host "🐳 Construyendo saga-orchestrator..." -ForegroundColor Yellow
+docker build -t ratgym/saga-orchestrator:latest ./apps/saga-orchestrator
 
-docker build \
-  -t ratgym/nutrition-service:latest \
-  -f apps/nutrition-service/backend/Dockerfile \
-  apps/nutrition-service/backend
+Write-Host "🐳 Construyendo nutrition-service (backend)..." -ForegroundColor Yellow
+docker build -t ratgym/nutrition-service:latest ./apps/nutrition-service/backend
 
-# -----------------------------
-# 3️⃣ Desplegar LLaMA
-# -----------------------------
-echo "🤖 Desplegando LLaMA (Ollama)..."
+Write-Host "🐳 Construyendo shell (frontend)..." -ForegroundColor Yellow
+docker build -t ratgym/shell:latest ./apps/frontend/shell
 
+# ===============================
+# 📦 Verificar imágenes
+# ===============================
+
+Write-Host "📦 Imágenes construidas:" -ForegroundColor Green
+docker images | Select-String ratgym
+
+# ===============================
+# 🚀 Deploy Kubernetes
+# ===============================
+
+Write-Host "🚀 Desplegando ConfigMaps y RabbitMQ..." -ForegroundColor Yellow
+kubectl apply -f infra/k8s/configmap.yaml
+kubectl apply -f infra/k8s/services/rabbitmq.yaml
+
+Start-Sleep -Seconds 15
+
+Write-Host "🚀 Desplegando microservicios..." -ForegroundColor Yellow
+kubectl apply -f infra/k8s/deployments/
+
+# ===============================
+# 🤖 Deploy IA - LLaMA (Ollama)
+# ===============================
+
+Write-Host "🤖 Desplegando LLaMA Service..." -ForegroundColor Magenta
 kubectl apply -f infra/k8s/deployments/llama-service.yaml
 
-echo "⏳ Esperando a que LLaMA esté listo..."
-kubectl wait \
-  --for=condition=available \
-  deployment/llama-service \
-  --timeout=300s
+# ===============================
+# 📊 Estado
+# ===============================
 
-# -----------------------------
-# 4️⃣ Desplegar Nutrition Service
-# -----------------------------
-echo "🥗 Desplegando nutrition-service..."
-
-kubectl apply -f infra/k8s/deployments/nutrition-service.yaml
-
-echo "⏳ Esperando nutrition-service..."
-kubectl wait \
-  --for=condition=available \
-  deployment/nutrition-service \
-  --timeout=180s
-
-# -----------------------------
-# 5️⃣ Estado final
-# -----------------------------
-echo "📦 Pods activos:"
+Write-Host "📊 Estado de los pods:" -ForegroundColor Cyan
 kubectl get pods
 
-echo "✅ TODO LISTO"
-echo ""
-echo "👉 Para probar localmente:"
-echo "kubectl port-forward service/nutrition-service 3004:3004"
+# ===============================
+# 🌐 Accesos
+# ===============================
+
+Write-Host "`n🌐 Para acceder a los servicios:" -ForegroundColor Green
+Write-Host "kubectl port-forward svc/shell 3000:3000" -ForegroundColor White
+Write-Host "kubectl port-forward svc/user-service 3001:3001" -ForegroundColor White
+Write-Host "kubectl port-forward svc/nutrition-service 3004:3004" -ForegroundColor White
+Write-Host "kubectl port-forward svc/saga-orchestrator 3005:3005" -ForegroundColor White
+Write-Host "kubectl port-forward svc/llama-service 11434:11434" -ForegroundColor White
