@@ -405,21 +405,16 @@ export const HomePage: React.FC = () => {
           </div>
 
           <div
-            onClick={() => setActiveSection('nutricion')}
             style={{
               backgroundColor: '#fff',
               borderRadius: '8px',
-              padding: '24px',
               border: '1px solid #e0e0e0',
+              overflow: 'hidden',
               cursor: 'pointer',
-              transition: 'box-shadow 0.2s',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)'}
-            onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
+            onClick={() => setActiveSection('nutricion')}
           >
-            <div style={{ fontSize: '40px', marginBottom: '16px' }}>🥗</div>
-            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#000' }}>Nutrición</h3>
-            <p style={{ color: '#666', margin: 0 }}>Tu plan alimenticio</p>
+            <NutritionWidget userId={currentUser || 'guest'} />
           </div>
         </div>
       </>
