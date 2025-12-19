@@ -384,7 +384,7 @@ export const HomePage: React.FC = () => {
           }}
             onClick={() => setActiveSection('rutinas')}
           >
-            <RoutineWidget userId={currentUser || 'guest'} compact={true} />
+            <RoutineWidget userId={currentUser || 'guest'} compact={true} onNavigate={() => setActiveSection('rutinas')} />
           </div>
 
           <div
@@ -410,7 +410,7 @@ export const HomePage: React.FC = () => {
             }}
             onClick={() => setActiveSection('nutricion')}
           >
-            <NutritionWidget userId={currentUser || 'guest'} />
+            <NutritionWidget userId={currentUser || 'guest'} compact={true} onNavigate={() => setActiveSection('nutricion')} />
           </div>
         </div>
       </>
