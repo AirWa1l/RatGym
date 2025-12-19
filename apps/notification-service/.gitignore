@@ -1,0 +1,15 @@
+# --- COSAS QUE NO SE DEBEN SUBIR (LISTA NEGRA) ---
+
+# Carpetas de ejecución de Python (Basura)
+__pycache__/
+
+# Archivos de configuración de VS Code y del Sistema
+.vscode/
+.DS_Store
+
+# Variables de entorno con credenciales
+.env
+
+# Datos locales persistentes
+data/
+*.json

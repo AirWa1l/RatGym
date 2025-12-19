@@ -21,6 +21,9 @@ docker build -t ratgym/class-service:latest ./apps/class-service
 Write-Host "🐳 Construyendo saga-orchestrator..." -ForegroundColor Yellow
 docker build -t ratgym/saga-orchestrator:latest ./apps/saga-orchestrator
 
+Write-Host "🐳 Construyendo notification-service..." -ForegroundColor Yellow
+docker build -t ratgym/notification-service:latest ./apps/notification-service
+
 Write-Host "🐳 Construyendo nutrition-service (backend)..." -ForegroundColor Yellow
 docker build -t ratgym/nutrition-service:latest ./apps/nutrition-service/backend
 
@@ -75,4 +78,5 @@ Write-Host "kubectl port-forward svc/routine-service 3002:3002" -ForegroundColor
 Write-Host "kubectl port-forward svc/class-service 3003:3003" -ForegroundColor White
 Write-Host "kubectl port-forward svc/nutrition-service 3004:3004" -ForegroundColor White
 Write-Host "kubectl port-forward svc/saga-orchestrator 3005:3005" -ForegroundColor White
+Write-Host "kubectl port-forward svc/notification-service 3006:3006" -ForegroundColor White
 Write-Host "kubectl port-forward svc/llama-service 11434:11434" -ForegroundColor White

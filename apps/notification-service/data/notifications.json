@@ -1,0 +1,139 @@
+[
+  {
+    "user_id": "user-123",
+    "title": "¡Bienvenido a RatGym! 🎉",
+    "type": "SYSTEM_INFO",
+    "message": "Hola Camilo, tu cuenta ha sido creada exitosamente. ¡Comienza tu transformación hoy!",
+    "priority": "MEDIUM",
+    "metadata": {
+      "user_id": "user-123",
+      "name": "Camilo"
+    },
+    "id": "f0f25de0-58ce-47c1-bd63-43c499581718",
+    "created_at": "2025-12-18T22:39:38.165902",
+    "read": false
+  },
+  {
+    "user_id": "user-1234256",
+    "title": "¡Bienvenido a RatGym! 🎉",
+    "type": "SYSTEM_INFO",
+    "message": "Hola Camilo Andres, tu cuenta ha sido creada exitosamente. ¡Comienza tu transformación hoy!",
+    "priority": "MEDIUM",
+    "metadata": {
+      "user_id": "user-1234256",
+      "name": "Camilo Andres"
+    },
+    "id": "91fc22d7-026f-4f3e-bbf4-2598ac5c792c",
+    "created_at": "2025-12-18T22:48:37.343596",
+    "read": false
+  },
+  {
+    "user_id": "user-1234567",
+    "title": "¡Bienvenido a RatGym! 🎉",
+    "type": "SYSTEM_INFO",
+    "message": "Hola Camilo Mz, tu cuenta ha sido creada exitosamente. ¡Comienza tu transformación hoy!",
+    "priority": "MEDIUM",
+    "metadata": {
+      "user_id": "user-1234567",
+      "name": "Camilo Mz"
+    },
+    "id": "d98f1db0-2f45-4219-bad3-8b972390d869",
+    "created_at": "2025-12-19T00:55:22.866659",
+    "read": false
+  },
+  {
+    "user_id": "user_123",
+    "title": "¡Bienvenido a RatGym! 🎉",
+    "type": "SYSTEM_INFO",
+    "message": "Hola Juan Pérez, tu cuenta ha sido creada exitosamente. ¡Comienza tu transformación hoy!",
+    "priority": "MEDIUM",
+    "metadata": {
+      "user_id": "user_123",
+      "name": "Juan Pérez",
+      "email": "juan@ratgym.com"
+    },
+    "id": "83b3c520-b121-48f8-9b50-8d698bb2e07f",
+    "created_at": "2025-12-19T01:11:53.918113",
+    "read": false
+  },
+  {
+    "user_id": "user_123",
+    "title": "Nueva rutina asignada 💪",
+    "type": "ROUTINE_ASSIGNED",
+    "message": "Se ha creado tu rutina 'Full Body 7 días' de 7 días. ¡Es hora de entrenar!",
+    "priority": "HIGH",
+    "metadata": {
+      "user_id": "user_123",
+      "routine_name": "Full Body 7 días",
+      "duration_days": 7,
+      "difficulty": "intermedio"
+    },
+    "id": "1bc4ce4c-6506-49f3-854a-fd0d4faff510",
+    "created_at": "2025-12-19T01:11:53.919329",
+    "read": false
+  },
+  {
+    "user_id": "user_123",
+    "title": "Entreno del día 1 🏋️",
+    "type": "DAILY_ROUTINE",
+    "message": "Esta es tu rutina de hoy: Sentadillas 4x12, Press banca 4x10, Dominadas 3x8. ¡Dale con todo!",
+    "priority": "HIGH",
+    "metadata": {
+      "user_id": "user_123",
+      "day_number": 1,
+      "routine_name": "Full Body",
+      "exercises": "Sentadillas 4x12, Press banca 4x10, Dominadas 3x8"
+    },
+    "id": "b49fa154-4dc8-444a-9947-5ea185c8b39d",
+    "created_at": "2025-12-19T01:11:53.921186",
+    "read": false
+  },
+  {
+    "user_id": "user_123",
+    "title": "Plan nutricional disponible 🥗",
+    "type": "NUTRITION_PLAN",
+    "message": "Tu plan nutricional de 2500 calorías está listo. ¡A comer saludable!",
+    "priority": "HIGH",
+    "metadata": {
+      "user_id": "user_123",
+      "calories": 2500,
+      "protein": 180,
+      "carbs": 300,
+      "fats": 70
+    },
+    "id": "fde90eb5-c0ee-47b5-8c4b-652d5fce988a",
+    "created_at": "2025-12-19T01:11:53.924989",
+    "read": false
+  },
+  {
+    "user_id": "user_123",
+    "title": "Hora de almuerzo 🍽️",
+    "type": "MEAL_REMINDER",
+    "message": "Recuerda tu almuerzo: Pollo con arroz y vegetales - 500 cal",
+    "priority": "MEDIUM",
+    "metadata": {
+      "user_id": "user_123",
+      "meal_type": "almuerzo",
+      "meal_description": "Pollo con arroz y vegetales - 500 cal"
+    },
+    "id": "9ad77e10-7b40-4693-85c5-683350bd7136",
+    "created_at": "2025-12-19T01:11:53.928132",
+    "read": false
+  },
+  {
+    "user_id": "user_123",
+    "title": "Clase programada 📅",
+    "type": "CLASS_REMINDER",
+    "message": "Tienes una clase de Spinning programada para el 2025-12-20 a las 18:00",
+    "priority": "HIGH",
+    "metadata": {
+      "user_id": "user_123",
+      "class_name": "Spinning",
+      "date": "2025-12-20",
+      "time": "18:00"
+    },
+    "id": "25fe4b87-7c4a-4c27-935d-e391b900ef5b",
+    "created_at": "2025-12-19T01:11:53.931005",
+    "read": false
+  }
+]
