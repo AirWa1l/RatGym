@@ -1,6 +1,23 @@
 # 🔌 Integración con Notification Service
 
-Guía para que otros microservicios envíen eventos al notification-service.
+Guía completa de integración con notification-service.
+
+## ✅ Servicios Integrados
+
+### Class Service
+- ✅ Eventos de reservas de clases
+- ✅ Eventos de cancelaciones
+- ✅ Eventos de asistencia confirmada
+- ✅ RabbitMQ configurado
+
+### Nutrition Service
+- ✅ Eventos de planes nutricionales
+- ✅ RabbitMQ configurado
+
+### Routine Service
+- ✅ Eventos de rutinas creadas
+- ✅ Eventos de rutinas completadas
+- ✅ RabbitMQ configurado
 
 ## 📡 Configuración de RabbitMQ
 
@@ -9,6 +26,115 @@ El notification-service escucha en la cola `notifications_queue` y se suscribe a
 - `routines`
 - `nutrition`
 - `classes`
+
+## 🎯 Eventos Disponibles
+
+### Class Service Events
+```typescript
+// class.scheduled - Nueva clase programada
+{
+  type: "class.scheduled",
+  data: {
+    class_id: string,
+    class_name: string,
+    instructor: string,
+    date: Date,
+    start_time: string,
+    duration: number,
+    category: string
+  }
+}
+
+// class.booked - Usuario reserva una clase
+{
+  type: "class.booked",
+  data: {
+    user_id: string,
+    user_name: string,
+    class_id: string,
+    class_name: string,
+    instructor: string,
+    date: Date,
+    start_time: string,
+    category: string
+  }
+}
+
+// class.cancelled - Usuario cancela reserva
+{
+  type: "class.cancelled",
+  data: {
+    user_id: string,
+    class_id: string,
+    class_name: string,
+    date: Date,
+    start_time: string
+  }
+}
+
+// class.attended - Usuario asiste a clase
+{
+  type: "class.attended",
+  data: {
+    user_id: string,
+    class_id: string,
+    class_name: string,
+    instructor: string,
+    category: string,
+    date: Date
+  }
+}
+```
+
+### Nutrition Service Events
+```typescript
+// nutrition.plan_created - Plan nutricional creado
+{
+  type: "nutrition.plan_created",
+  data: {
+    user_id: string,
+    calories: number,
+    protein: number,
+    carbs: number,
+    fat: number,
+    objective: string,
+    weight: number,
+    height: number,
+    age: number
+  }
+}
+```
+
+### Routine Service Events
+```typescript
+// routine.created - Nueva rutina creada
+{
+  type: "routine.created",
+  data: {
+    user_id: string,
+    routine_id: string,
+    routine_name: string,
+    difficulty: string,
+    category: string,
+    duration_minutes: number,
+    exercises_count: number
+  }
+}
+
+// routine.completed - Rutina completada
+{
+  type: "routine.completed",
+  data: {
+    user_id: string,
+    routine_id: string,
+    routine_name: string,
+    difficulty: string,
+    category: string,
+    times_completed: number,
+    exercises_count: number
+  }
+}
+```
 
 ## 🐍 Ejemplo en Python (FastAPI)
 

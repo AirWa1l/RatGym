@@ -21,13 +21,46 @@ import { SagaModule } from './saga/saga.module';
         },
       },
       {
+        name: 'ROUTINE_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
+          queue: process.env.ROUTINE_SERVICE_QUEUE || 'routine_service_queue',
+          queueOptions: {
+            durable: true,
+          },
+        },
+      },
+      {
+        name: 'NUTRITION_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
+          queue: process.env.NUTRITION_SERVICE_QUEUE || 'nutrition_service_queue',
+          queueOptions: {
+            durable: true,
+          },
+        },
+      },
+      {
+        name: 'CLASS_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
+          queue: process.env.CLASS_SERVICE_QUEUE || 'class_service_queue',
+          queueOptions: {
+            durable: true,
+          },
+        },
+      },
+      {
         name: 'NOTIFICATION_SERVICE',
         transport: Transport.RMQ,
         options: {
           urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
-          queue: process.env.NOTIFICATION_SERVICE_QUEUE || 'notification_service_queue',
+          queue: process.env.NOTIFICATION_SERVICE_QUEUE || 'notifications_queue',
           queueOptions: {
-            durable: true,
+            durable: false,
           },
         },
       },

@@ -1,5 +1,6 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
+import { RabbitMQService } from '../rabbitmq/rabbitmq.service';
 import {
   Class,
   Booking,
@@ -22,7 +23,7 @@ export class ClassService {
   private classes: Map<string, Class> = new Map();
   private bookings: Map<string, Booking> = new Map();
 
-  constructor() {
+  constructor(private readonly rabbitMQService: RabbitMQService) {
     this.seedClasses();
   }
 
@@ -194,6 +195,17 @@ export class ClassService {
     this.classes.set(newClass.id, newClass);
     this.logger.log(`Created class: ${newClass.name} (${newClass.id})`);
 
+    // Emitir evento de clase creada
+    this.rabbitMQService.publishEvent('class.scheduled', {
+      class_id: newClass.id,
+      class_name: newClass.name,
+      instructor: newClass.instructor,
+      date: newClass.date,
+      start_time: newClass.startTime,
+      duration: newClass.duration,
+      category: newClass.category,
+    });
+
     return newClass;
   }
 
@@ -362,6 +374,18 @@ export class ClassService {
 
     this.logger.log(`User ${bookClassDto.userId} booked class ${classId}`);
 
+    // Emitir evento de reserva confirmada
+    this.rabbitMQService.publishEvent('class.booked', {
+      user_id: bookClassDto.userId,
+      user_name: bookClassDto.userName,
+      class_id: classId,
+      class_name: classItem.name,
+      instructor: classItem.instructor,
+      date: classItem.date,
+      start_time: classItem.startTime,
+      category: classItem.category,
+    });
+
     return booking;
   }
 
@@ -388,6 +412,15 @@ export class ClassService {
     this.classes.set(classId, classItem);
 
     this.logger.log(`User ${cancelBookingDto.userId} cancelled booking for class ${classId}`);
+
+    // Emitir evento de cancelación
+    this.rabbitMQService.publishEvent('class.cancelled', {
+      user_id: cancelBookingDto.userId,
+      class_id: classId,
+      class_name: classItem.name,
+      date: classItem.date,
+      start_time: classItem.startTime,
+    });
   }
 
   /**
@@ -419,7 +452,7 @@ export class ClassService {
    * Marcar asistencia a una clase
    */
   markAttendance(classId: string, markAttendanceDto: MarkAttendanceDto): Booking {
-    this.findOne(classId); // Verificar que la clase existe
+    const classItem = this.findOne(classId); // Verificar que la clase existe
 
     const booking = Array.from(this.bookings.values()).find(
       (b) => b.classId === classId && b.userId === markAttendanceDto.userId && !b.cancelledAt,
@@ -435,6 +468,18 @@ export class ClassService {
     this.logger.log(
       `Marked attendance for user ${markAttendanceDto.userId} in class ${classId}: ${markAttendanceDto.attended}`,
     );
+
+    // Emitir evento de asistencia confirmada
+    if (markAttendanceDto.attended) {
+      this.rabbitMQService.publishEvent('class.attended', {
+        user_id: markAttendanceDto.userId,
+        class_id: classId,
+        class_name: classItem.name,
+        instructor: classItem.instructor,
+        category: classItem.category,
+        date: classItem.date,
+      });
+    }
 
     return booking;
   }

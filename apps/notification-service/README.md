@@ -9,6 +9,25 @@ Microservicio de notificaciones para la plataforma RatGym. Gestiona alertas y me
 - ✅ **API REST completa**: CRUD de notificaciones
 - ✅ **Notificaciones inteligentes**: Basadas en eventos de rutinas, nutrición y clases
 - ✅ **Estadísticas**: Contador de notificaciones leídas/no leídas por tipo y prioridad
+- ✅ **Integración completa**: Class-service, Nutrition-service, Routine-service
+
+## 🔗 Servicios Integrados
+
+### Class Service
+- Reservas de clases confirmadas
+- Cancelaciones de reservas
+- Asistencias confirmadas
+- Nuevas clases programadas
+
+### Nutrition Service
+- Planes nutricionales creados
+- Recordatorios de comidas
+- Metas alcanzadas
+
+### Routine Service
+- Nuevas rutinas asignadas
+- Rutinas completadas
+- Recordatorios diarios
 
 ## 🚀 Cómo correr localmente
 
@@ -37,6 +56,15 @@ Variables principales:
 ```bash
 # Desde la raíz del microservicio
 uvicorn src.main:app --host 0.0.0.0 --port 3006 --reload
+```
+
+O usando el script de inicio:
+```bash
+# Windows
+.\start.ps1
+
+# Linux/Mac
+./start.sh
 ```
 
 El servicio estará disponible en: **http://localhost:3006**

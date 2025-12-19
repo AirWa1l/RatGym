@@ -35,6 +35,21 @@ spec:
             configMapKeyRef:
               name: ratgym-config
               key: USER_SERVICE_QUEUE
+        - name: ROUTINE_SERVICE_QUEUE
+          valueFrom:
+            configMapKeyRef:
+              name: ratgym-config
+              key: ROUTINE_SERVICE_QUEUE
+        - name: NUTRITION_SERVICE_QUEUE
+          valueFrom:
+            configMapKeyRef:
+              name: ratgym-config
+              key: NUTRITION_SERVICE_QUEUE
+        - name: CLASS_SERVICE_QUEUE
+          valueFrom:
+            configMapKeyRef:
+              name: ratgym-config
+              key: CLASS_SERVICE_QUEUE
         - name: NOTIFICATION_SERVICE_QUEUE
           valueFrom:
             configMapKeyRef:
@@ -49,13 +64,13 @@ spec:
             cpu: "500m"
         livenessProbe:
           httpGet:
-            path: /saga/all
+            path: /saga/health
             port: 3005
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /saga/all
+            path: /saga/health
             port: 3005
           initialDelaySeconds: 10
           periodSeconds: 5
