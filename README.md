@@ -16,13 +16,15 @@ docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-manageme
 
 # 2. Instalar dependencias
 cd apps/user-service && npm install
+cd apps/routine-service && npm install
 cd apps/saga-orchestrator && npm install
 cd apps/frontend/shell && npm install
 
-# 3. Iniciar servicios (3 terminales)
+# 3. Iniciar servicios (4 terminales)
 cd apps/user-service && npm run start:dev       # Terminal 1 - Puerto 3001
-cd apps/saga-orchestrator && npm run start:dev  # Terminal 2 - Puerto 3005
-cd apps/frontend/shell && npm run dev           # Terminal 3 - Puerto 3000
+cd apps/routine-service && npm run start:dev    # Terminal 2 - Puerto 3002
+cd apps/saga-orchestrator && npm run start:dev  # Terminal 3 - Puerto 3005
+cd apps/frontend/shell && npm run dev           # Terminal 4 - Puerto 3000
 ```
 
 ### Opción 3: Docker Compose
@@ -39,6 +41,7 @@ Ver [QUICKSTART.md](QUICKSTART.md#kubernetes-opción-3---producción)
 |----------|-----|-------------|
 | **Frontend** | http://localhost:3000 | Dashboard principal |
 | **User Service** | http://localhost:3001 | Auth y usuarios |
+| **Routine Service** | http://localhost:3002 | Rutinas y ejercicios |
 | **Saga Orchestrator** | http://localhost:3005 | Transacciones distribuidas |
 | **RabbitMQ UI** | http://localhost:15672 | Management Console (guest/guest) |
 
@@ -47,10 +50,11 @@ Ver [QUICKSTART.md](QUICKSTART.md#kubernetes-opción-3---producción)
 ```
 apps/
   ├── user-service/          # Auth con username local (in-memory)
+  ├── routine-service/       # Gestión de rutinas y ejercicios
   ├── saga-orchestrator/     # Orquestación de sagas distribuidas
   ├── frontend/
   │   └── shell/            # Dashboard profesional React
-  └── [otros servicios]/    # routine, class, nutrition, etc.
+  └── [otros servicios]/    # class, nutrition, etc.
 infra/
   ├── k8s/                  # Configuraciones Kubernetes
   └── docker/               # Configuraciones Docker
@@ -80,6 +84,22 @@ infra/
 - `POST /auth/login` - Login (auto-crea usuario)
 - `GET /auth/users` - Listar usuarios
 - `GET /auth/health` - Health check
+
+### Routine Service (puerto 3002)
+- `GET /routines` - Listar rutinas públicas
+- `GET /routines/:id` - Obtener rutina por ID
+- `POST /routines` - Crear nueva rutina
+- `PUT /routines/:id` - Actualizar rutina
+- `DELETE /routines/:id` - Eliminar rutina
+- `POST /routines/:id/complete` - Marcar rutina como completada
+- `POST /routines/:id/duplicate` - Duplicar rutina
+- `GET /routines/user/:userId` - Rutinas de un usuario
+- `GET /routines/category/:category` - Filtrar por categoría
+- `GET /routines/difficulty/:level` - Filtrar por dificultad
+- `GET /exercises` - Listar ejercicios
+- `GET /exercises/:id` - Obtener ejercicio por ID
+- `GET /exercises/muscle/:group` - Filtrar por grupo muscular
+- `GET /health` - Health check
 
 ### Saga Orchestrator (puerto 3005)
 - `POST /saga/user-registration` - Iniciar saga de registro

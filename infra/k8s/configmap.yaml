@@ -10,6 +10,7 @@ data:
   
   # Service URLs (for HTTP communication)
   USER_SERVICE_URL: "http://user-service:3001"
+  ROUTINE_SERVICE_URL: "http://routine-service:3002"
   SAGA_ORCHESTRATOR_URL: "http://saga-orchestrator:3005"
   SHELL_URL: "http://shell:3000"
   
