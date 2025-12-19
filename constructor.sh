@@ -12,6 +12,9 @@ minikube docker-env | Invoke-Expression
 Write-Host "🐳 Construyendo user-service..." -ForegroundColor Yellow
 docker build -t ratgym/user-service:latest ./apps/user-service
 
+Write-Host "🐳 Construyendo routine-service..." -ForegroundColor Yellow
+docker build -t ratgym/routine-service:latest ./apps/routine-service
+
 Write-Host "🐳 Construyendo class-service..." -ForegroundColor Yellow
 docker build -t ratgym/class-service:latest ./apps/class-service
 
@@ -65,6 +68,8 @@ kubectl get pods
 Write-Host "`n🌐 Para acceder a los servicios:" -ForegroundColor Green
 Write-Host "kubectl port-forward svc/shell 3000:3000" -ForegroundColor White
 Write-Host "kubectl port-forward svc/user-service 3001:3001" -ForegroundColor White
+Write-Host "kubectl port-forward svc/routine-service 3002:3002" -ForegroundColor White
+Write-Host "kubectl port-forward svc/class-service 3003:3003" -ForegroundColor White
 Write-Host "kubectl port-forward svc/nutrition-service 3004:3004" -ForegroundColor White
 Write-Host "kubectl port-forward svc/saga-orchestrator 3005:3005" -ForegroundColor White
 Write-Host "kubectl port-forward svc/llama-service 11434:11434" -ForegroundColor White
