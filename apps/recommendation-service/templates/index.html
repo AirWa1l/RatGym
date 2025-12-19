@@ -3,22 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <title>AI Fitness Coach</title>
-
-    <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-    <h1>🏋️ AI Fitness Coach</h1>
+    <div class="chat-container">
 
-    <div class="buttons">
-        <button onclick="generarRutina()">Rutina de Hoy</button>
-        <button onclick="generarReceta()">Alimentación de Hoy</button>
+        <div class="preferences">
+            <h4>Selecciona tus metas (máx. 3)</h4>
+
+            <label><input type="checkbox" value="Adelgazar"> Adelgazar</label>
+            <label><input type="checkbox" value="Aumentar masa muscular"> Aumentar masa muscular</label>
+            <label><input type="checkbox" value="Tonificar"> Tonificar</label>
+            <label><input type="checkbox" value="Aumentar resistencia anaeróbica"> Aumentar resistencia anaeróbica</label>
+            <label><input type="checkbox" value="Fortalecer articulaciones"> Fortalecer articulaciones</label>
+        </div>
+
+
+        <div id="chat">
+            <div class="message bot-message">
+                <span>¡Hola! Soy tu entrenador personal AI. ¿En qué puedo ayudarte hoy?</span>
+            </div>
+        </div>
+
+        <div id="loader" class="loader hidden">
+            <div class="spinner"></div>
+            <span>Procesando recomendación...</span>
+        </div>
+
+        <div class="actions">
+            <button onclick="generarRutina()">Rutina de entrenamiento</button>
+            <button onclick="generarReceta()">Recomendación nutricional</button>
+        </div>
+
     </div>
 
-    <div id="resultado" class="card"></div>
-
-    <!-- JS -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

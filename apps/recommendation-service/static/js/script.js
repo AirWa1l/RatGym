@@ -1,56 +1,121 @@
+const chat = document.getElementById("chat");
+
 const usuarioInfo =
     "Nombre: Juan Esteban, " +
     "Objetivo: Aumentar masa muscular, Quemar grasa, Tener hombros anchos";
 
+function addMessage(text, type = "ai") {
+    const div = document.createElement("div");
+    div.className = `message ${type}`;
+    div.innerHTML = text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
 function generarRutina() {
-    fetch("/generar_rutina", {
+    const metas = getMetasSeleccionadas();
+
+    addMessage("Quiero una rutina de entrenamiento para hoy.", "user");
+    showLoader();
+
+    fetch("/recomendacion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario_info: usuarioInfo })
+        body: JSON.stringify({
+            tipo: "rutina",
+            metas: metas
+        })
     })
     .then(res => res.json())
-    .then(data => renderRutina(data));
+    .then(data => {
+        hideLoader();
+
+        if (data.error) {
+            addMessage(`⚠️ ${data.message}`, "error");
+            return;
+        }
+
+        let html = `<strong>${data.saludo}</strong><ul>`;
+        data.ejercicios.forEach(e => {
+            html += `<li>${e.ejercicio}: ${e.series} x ${e.repeticiones}</li>`;
+        });
+        html += "</ul>";
+
+        addMessage(html, "ai");
+    })
+    .catch(() => {
+        hideLoader();
+        addMessage("⚠️ Error de conexión.", "error");
+    });
 }
+
+
 
 function generarReceta() {
-    fetch("/generar_receta", {
+    const metas = getMetasSeleccionadas();
+
+    addMessage("¿Qué debería comer hoy?", "user");
+    showLoader();
+
+    fetch("/recomendacion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario_info: usuarioInfo })
+        body: JSON.stringify({
+            tipo: "nutricion",
+            metas: metas
+        })
     })
     .then(res => res.json())
-    .then(data => renderReceta(data));
-}
+    .then(data => {
+        hideLoader();
 
-function renderRutina(data) {
-    const card = document.getElementById("resultado");
-    card.style.display = "block";
+        if (data.error) {
+            addMessage(`⚠️ ${data.message}`, "error");
+            return;
+        }
 
-    let html = `<h2>${data.saludo}</h2><ul>`;
-    data.ejercicios.forEach(e => {
-        html += `<li><strong>${e.ejercicio}</strong>: ${e.series} x ${e.repeticiones}</li>`;
+        let html = `
+            <strong>${data.titulo}</strong>
+            <p>${data.descripcion}</p>
+
+            <strong>Ingredientes</strong>
+            <ul>
+                ${data.ingredientes.map(i => `<li>${i}</li>`).join("")}
+            </ul>
+
+            <strong>Preparación</strong>
+            <ol>
+                ${data.preparacion.map(p => `<li>${p}</li>`).join("")}
+            </ol>
+
+            <strong>Calorías aproximadas:</strong> ${data.calorias_aproximadas} kcal
+        `;
+
+        addMessage(html, "ai");
+    })
+    .catch(() => {
+        hideLoader();
+        addMessage("⚠️ Error de conexión con el servidor.", "error");
     });
-    html += "</ul>";
-
-    card.innerHTML = html;
 }
 
-function renderReceta(data) {
-    const card = document.getElementById("resultado");
-    card.style.display = "block";
 
-    let html = `
-        <h2>${data.titulo}</h2>
-        <p>${data.descripcion}</p>
+function showLoader() {
+    document.getElementById("loader").classList.remove("hidden");
+}
 
-        <h4>Ingredientes</h4>
-        <ul>${data.ingredientes.map(i => `<li>${i}</li>`).join("")}</ul>
+function hideLoader() {
+    document.getElementById("loader").classList.add("hidden");
+}
 
-        <h4>Preparación</h4>
-        <ol>${data.preparacion.map(p => `<li>${p}</li>`).join("")}</ol>
+function getMetasSeleccionadas() {
+    const checkboxes = document.querySelectorAll(".preferences input:checked");
 
-        <p><strong>Calorías:</strong> ${data.calorias_aproximadas}</p>
-    `;
+    if (checkboxes.length > 3) {
+        alert("Puedes seleccionar máximo 3 metas.");
+        checkboxes[checkboxes.length - 1].checked = false;
+        return [];
+    }
 
-    card.innerHTML = html;
+    return Array.from(checkboxes).map(cb => cb.value);
 }

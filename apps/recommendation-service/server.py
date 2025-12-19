@@ -14,21 +14,23 @@ app = Flask(__name__)
 def app_front():
     return render_template('index.html')
 
-@app.route('/generar_rutina', methods=['POST'])
-def generar_rutina_endpoint():
-    from recomendationAI import generar_rutina
+@app.route('/recomendacion', methods=['POST'])
+def recomendacion():
+    from recomendationAI import generar_recomendacion
 
-    usuario_info = request.json.get('usuario_info', '')
-    rutina = generar_rutina(usuario_info)
-    return jsonify(rutina)
+    data = request.get_json()
 
-@app.route('/generar_receta', methods=['POST'])
-def generar_receta_endpoint():
-    from recomendationAI import generar_receta_saludable
+    tipo = data.get("tipo")           # "rutina" | "nutricion"
+    metas = data.get("metas", [])     # lista de strings
 
-    usuario_info = request.json.get('usuario_info', '')
-    receta = generar_receta_saludable(usuario_info)
-    return jsonify(receta)
+    resultado = generar_recomendacion(tipo, metas)
+
+    # Si hubo error, devolvemos código controlado
+    if resultado.get("error"):
+        return jsonify(resultado), 503
+
+    return jsonify(resultado)
+
 
 os.makedirs("logs", exist_ok=True)
 
