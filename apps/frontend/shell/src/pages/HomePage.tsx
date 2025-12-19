@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { RoutineWidget } from '../components/RoutineWidget';
 import NutritionWidget from '../components/NutritionWidget';
+import RecommendationWidget from '../components/RecommendationWidget';
 
 
-type Section = 'dashboard' | 'rutinas' | 'clases' | 'nutricion' | 'progreso' | 'notificaciones' | 'configuracion';
+type Section = 'dashboard' | 'rutinas' | 'clases' | 'nutricion' | 'progreso' | 'notificaciones' | 'configuracion' | 'recomendaciones';
 
 export const HomePage: React.FC = () => {
   const [username, setUsername] = useState<string>('');
@@ -310,6 +311,7 @@ export const HomePage: React.FC = () => {
         {activeSection === 'nutricion' && renderNutricion()}
         {activeSection === 'progreso' && renderComingSoon('Progreso', '📊', 'Tu rendimiento y estadísticas')}
         {activeSection === 'notificaciones' && renderComingSoon('Notificaciones', '🔔', 'Alertas y recordatorios')}
+        {activeSection === 'recomendaciones' && renderRecommendation()}
         {activeSection === 'configuracion' && renderComingSoon('Configuración', '⚙️', 'Ajustes de tu cuenta')}
       </div>
     </div>
@@ -415,7 +417,22 @@ export const HomePage: React.FC = () => {
             onClick={() => setActiveSection('nutricion')}
           >
             <NutritionWidget userId={currentUser || 'guest'} />
+
           </div>
+
+          <div
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: '8px',
+              border: '1px solid #e0e0e0',
+              overflow: 'hidden',
+              cursor: 'pointer',
+            }}
+            onClick={() => setActiveSection('recomendaciones')}
+          >
+            <RecommendationWidget userId={currentUser || 'guest'} />
+          </div>
+          
         </div>
       </>
     );
@@ -485,6 +502,38 @@ export const HomePage: React.FC = () => {
     );
   }
 
+  function renderRecommendation() {
+    return (
+      <>
+        <div style={{ marginBottom: '32px' }}>
+          <h1
+            style={{
+              fontSize: '32px',
+              fontWeight: '700',
+              color: '#000',
+              marginBottom: '8px',
+            }}
+          >
+            Recomendaciones
+          </h1>
+          <p style={{ fontSize: '16px', color: '#666' }}>
+            Basado en tu progreso
+          </p>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            border: '1px solid #e0e0e0',
+            padding: '24px',
+          }}
+        >
+          <RecommendationWidget userId={currentUser || 'guest'} />
+        </div>
+      </>
+    );
+  }
 
   // Renderizar páginas "Próximamente"
   function renderComingSoon(title: string, icon: string, description: string) {
@@ -533,6 +582,7 @@ const menuItems: { icon: string; label: string; section: Section }[] = [
   { icon: '📊', label: 'Progreso', section: 'progreso' },
   { icon: '🔔', label: 'Notificaciones', section: 'notificaciones' },
   { icon: '⚙️', label: 'Configuración', section: 'configuracion' },
+  { icon: '⚙️', label: 'Recomendaciones', section: 'recomendaciones' }
 ];
 
 // Tarjetas de estadísticas

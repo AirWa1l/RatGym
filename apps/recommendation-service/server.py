@@ -1,15 +1,18 @@
 from flask import Flask, request, jsonify, render_template
-
 import os
-import json
 import dotenv
 import logging
-
 
 dotenv.load_dotenv()
 
 app = Flask(__name__)
 
+# 👉 Ruta raíz: carga directamente el frontend
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# (Opcional) mantener /app si ya lo usabas
 @app.route('/app')
 def app_front():
     return render_template('index.html')
@@ -25,13 +28,12 @@ def recomendacion():
 
     resultado = generar_recomendacion(tipo, metas)
 
-    # Si hubo error, devolvemos código controlado
     if resultado.get("error"):
         return jsonify(resultado), 503
 
     return jsonify(resultado)
 
-
+# ---------- LOGS ----------
 os.makedirs("logs", exist_ok=True)
 
 logging.basicConfig(
@@ -40,5 +42,10 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s"
 )
 
+# ---------- RUN ----------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(
+        host="0.0.0.0",
+        port=3007,   # 👈 puerto corregido
+        debug=True
+    )
