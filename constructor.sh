@@ -12,9 +12,6 @@ minikube docker-env | Invoke-Expression
 Write-Host "🐳 Construyendo user-service..." -ForegroundColor Yellow
 docker build -t ratgym/user-service:latest ./apps/user-service
 
-Write-Host "🐳 Construyendo class-service..." -ForegroundColor Yellow
-docker build -t ratgym/class-service:latest ./apps/class-service
-
 Write-Host "🐳 Construyendo saga-orchestrator..." -ForegroundColor Yellow
 docker build -t ratgym/saga-orchestrator:latest ./apps/saga-orchestrator
 
