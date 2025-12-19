@@ -6,9 +6,11 @@ type Objective = 'LOSE_WEIGHT' | 'MAINTAIN' | 'GAIN_MUSCLE';
 
 type NutritionWidgetProps = {
   userId: string;
+  compact?: boolean;
+  onNavigate?: () => void;
 };
 
-export default function NutritionWidget({ userId }: NutritionWidgetProps) {
+export default function NutritionWidget({ userId, compact = false, onNavigate }: NutritionWidgetProps) {
   const [weight, setWeight] = useState(75);
   const [height, setHeight] = useState(175);
   const [age, setAge] = useState(22);
@@ -152,6 +154,46 @@ export default function NutritionWidget({ userId }: NutritionWidgetProps) {
           </div>
         )}
       </div>
+
+      {/* Widget Footer - Solo en modo compacto */}
+      {compact && (
+        <div style={{
+          padding: '16px 24px',
+          backgroundColor: '#f8f9fa',
+          borderTop: '1px solid #f0f0f0',
+        }}>
+          <button
+            style={{
+              width: '100%',
+              padding: '10px',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#000',
+              backgroundColor: 'transparent',
+              border: '1px solid #e0e0e0',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#000';
+              e.currentTarget.style.color = '#fff';
+              e.currentTarget.style.borderColor = '#000';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#000';
+              e.currentTarget.style.borderColor = '#e0e0e0';
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onNavigate?.();
+            }}
+          >
+            Ver más →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

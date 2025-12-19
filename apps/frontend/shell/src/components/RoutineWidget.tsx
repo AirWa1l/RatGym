@@ -41,11 +41,12 @@ interface Exercise {
 interface RoutineWidgetProps {
   userId: string;
   compact?: boolean;
+  onNavigate?: () => void;
 }
 
 const ROUTINE_SERVICE_URL = 'http://localhost:3002';
 
-export const RoutineWidget: React.FC<RoutineWidgetProps> = ({ userId, compact = false }) => {
+export const RoutineWidget: React.FC<RoutineWidgetProps> = ({ userId, compact = false, onNavigate }) => {
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [publicRoutines, setPublicRoutines] = useState<Routine[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
@@ -443,6 +444,44 @@ export const RoutineWidget: React.FC<RoutineWidgetProps> = ({ userId, compact = 
               <div style={{ fontSize: '13px' }}>No tienes rutinas aún</div>
             </div>
           )}
+        </div>
+
+        {/* Widget Footer */}
+        <div style={{
+          padding: '16px 24px',
+          backgroundColor: '#f8f9fa',
+          borderTop: '1px solid #f0f0f0',
+        }}>
+          <button
+            style={{
+              width: '100%',
+              padding: '10px',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#000',
+              backgroundColor: 'transparent',
+              border: '1px solid #e0e0e0',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#000';
+              e.currentTarget.style.color = '#fff';
+              e.currentTarget.style.borderColor = '#000';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#000';
+              e.currentTarget.style.borderColor = '#e0e0e0';
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onNavigate?.();
+            }}
+          >
+            Ver más →
+          </button>
         </div>
       </div>
     );

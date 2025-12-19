@@ -58,6 +58,16 @@ spec:
             name: routine-service
             port:
               number: 3002
+      
+      # Class Service (classes and bookings)
+      - path: /classes(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: class-service
+            port:
+              number: 3003
+      
       # Frontend - Shell (Main Dashboard)
       - path: /(/|$)(.*)
         pathType: Prefix

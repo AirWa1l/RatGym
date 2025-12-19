@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { RoutineWidget } from '../components/RoutineWidget';
 import NutritionWidget from '../components/NutritionWidget';
+import { ClassWidget } from '../components/ClassWidget';
 import RecommendationWidget from '../components/RecommendationWidget';
 
 
@@ -307,7 +308,7 @@ export const HomePage: React.FC = () => {
         {/* Renderizar según la sección activa */}
         {activeSection === 'dashboard' && renderDashboard()}
         {activeSection === 'rutinas' && renderRutinas()}
-        {activeSection === 'clases' && renderComingSoon('Clases', '🎯', 'Próximas sesiones grupales')}
+        {activeSection === 'clases' && renderClases()}
         {activeSection === 'nutricion' && renderNutricion()}
         {activeSection === 'progreso' && renderComingSoon('Progreso', '📊', 'Tu rendimiento y estadísticas')}
         {activeSection === 'notificaciones' && renderComingSoon('Notificaciones', '🔔', 'Alertas y recordatorios')}
@@ -385,25 +386,20 @@ export const HomePage: React.FC = () => {
           }}
             onClick={() => setActiveSection('rutinas')}
           >
-            <RoutineWidget userId={currentUser || 'guest'} compact={true} />
+            <RoutineWidget userId={currentUser || 'guest'} compact={true} onNavigate={() => setActiveSection('rutinas')} />
           </div>
 
           <div
-            onClick={() => setActiveSection('clases')}
             style={{
               backgroundColor: '#fff',
               borderRadius: '8px',
-              padding: '24px',
               border: '1px solid #e0e0e0',
+              overflow: 'hidden',
               cursor: 'pointer',
-              transition: 'box-shadow 0.2s',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)'}
-            onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
+            onClick={() => setActiveSection('clases')}
           >
-            <div style={{ fontSize: '40px', marginBottom: '16px' }}>🎯</div>
-            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#000' }}>Clases</h3>
-            <p style={{ color: '#666', margin: 0 }}>Reserva sesiones grupales</p>
+            <ClassWidget userId={currentUser || 'guest'} compact={true} />
           </div>
 
           <div
@@ -416,7 +412,7 @@ export const HomePage: React.FC = () => {
             }}
             onClick={() => setActiveSection('nutricion')}
           >
-            <NutritionWidget userId={currentUser || 'guest'} />
+            <NutritionWidget userId={currentUser || 'guest'} compact={true} onNavigate={() => setActiveSection('nutricion')} />
 
           </div>
 
@@ -464,6 +460,36 @@ export const HomePage: React.FC = () => {
           minHeight: '600px',
         }}>
           <RoutineWidget userId={currentUser || 'guest'} />
+        </div>
+      </>
+    );
+  }
+
+  function renderClases() {
+    return (
+      <>
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{
+            fontSize: '32px',
+            fontWeight: '700',
+            color: '#000',
+            marginBottom: '8px',
+          }}>
+            Clases Grupales
+          </h1>
+          <p style={{ fontSize: '16px', color: '#666' }}>
+            Reserva y gestiona tus clases
+          </p>
+        </div>
+
+        <div style={{
+          backgroundColor: '#fff',
+          borderRadius: '12px',
+          border: '1px solid #e0e0e0',
+          overflow: 'hidden',
+          minHeight: '600px',
+        }}>
+          <ClassWidget userId={currentUser || 'guest'} />
         </div>
       </>
     );
