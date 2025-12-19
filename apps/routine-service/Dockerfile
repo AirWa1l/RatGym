@@ -1,35 +1,38 @@
 # Etapa de construcción
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copiar package files
-COPY package*.json ./
+# Copiar archivos de configuración y lock
+COPY package.json package-lock.json ./
+COPY tsconfig.json ./
+COPY nest-cli.json ./
 
-# Instalar dependencias
-RUN npm install
+# Instalar todas las dependencias
+RUN npm ci
 
-# Copiar código fuente
-COPY . .
+# Copiar solo el código fuente del backend (src)
+COPY src ./src
 
 # Compilar
 RUN npm run build
 
 # Etapa de producción
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Copiar solo lo necesario
+# Copiar package files
+COPY package.json package-lock.json ./
+
+# Instalar solo dependencias de producción
+RUN npm ci --omit=dev
+
+# Copiar el código compilado
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
 
 # Exponer puerto
 EXPOSE 3002
 
-# Usuario no root
-USER node
-
 # Comando de inicio
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main.js"]
