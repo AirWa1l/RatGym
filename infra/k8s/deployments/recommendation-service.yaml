@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: recommendation-service
-          image: ratgym/recommendation-service:latest
+          image: ratgym/recommendations-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3007
@@ -25,9 +25,11 @@ spec:
             - name: RABBITMQ_PORT
               value: "5672"
 
-            # App
-            - name: NODE_ENV
+            # Python/Flask
+            - name: FLASK_ENV
               value: production
+            - name: PYTHONUNBUFFERED
+              value: "1"
 
           resources:
             requests:

@@ -1,19 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { RoutineWidget } from '../components/RoutineWidget';
-import NutritionWidget from '../components/NutritionWidget';
 import { ClassWidget } from '../components/ClassWidget';
-import RecommendationWidget from '../components/RecommendationWidget';
+import NutritionWidget from '../components/NutritionWidget';
 
-
-type Section = 'dashboard' | 'rutinas' | 'clases' | 'nutricion' | 'progreso' | 'notificaciones' | 'configuracion' | 'recomendaciones';
+interface Notification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  type: string;
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  read: boolean;
+  created_at: string;
+}
 
 export const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   const [username, setUsername] = useState<string>('');
   const [currentUser, setCurrentUser] = useState<string | null>(
     localStorage.getItem('ratgym_username')
   );
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeSection, setActiveSection] = useState<Section>('dashboard');
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchNotifications();
+    }
+  }, [currentUser]);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch(`http://localhost:3006/notifications/user/${currentUser}`);
+      if (response.ok) {
+        const data = await response.json();
+        // Ordenar por fecha (más recientes primero) y tomar solo las últimas 4
+        const sortedNotifications = data
+          .sort((a: Notification, b: Notification) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          )
+          .slice(0, 4);
+        setNotifications(sortedNotifications);
+        setUnreadCount(data.filter((n: Notification) => !n.read).length);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    const icons: { [key: string]: string } = {
+      'ROUTINE_ASSIGNED': '💪',
+      'DAILY_ROUTINE': '📅',
+      'ROUTINE_COMPLETED': '✅',
+      'REST_DAY': '😴',
+      'NUTRITION_PLAN': '🥗',
+      'MEAL_REMINDER': '🍽️',
+      'GOAL_ACHIEVED': '🏆',
+      'CLASS_SCHEDULED': '🎯',
+      'CLASS_REMINDER': '⏰',
+      'CLASS_CANCELLED': '❌',
+      'SYSTEM_INFO': '🔔',
+    };
+    return icons[type] || '📬';
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    
+    if (hours < 1) return 'Hace menos de 1h';
+    if (hours < 24) return `Hace ${hours}h`;
+    const days = Math.floor(hours / 24);
+    return `Hace ${days}d`;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -246,7 +310,7 @@ export const HomePage: React.FC = () => {
           {menuItems.map((item, index) => (
             <div
               key={index}
-              onClick={() => setActiveSection(item.section)}
+              onClick={() => navigate(item.route)}
               style={{
                 padding: sidebarOpen ? '14px 20px' : '14px',
                 display: 'flex',
@@ -254,14 +318,14 @@ export const HomePage: React.FC = () => {
                 gap: '16px',
                 cursor: 'pointer',
                 transition: 'background-color 0.2s',
-                backgroundColor: activeSection === item.section ? '#1a1a1a' : 'transparent',
-                borderLeft: activeSection === item.section ? '4px solid #fff' : '4px solid transparent',
+                backgroundColor: index === 0 ? '#1a1a1a' : 'transparent',
+                borderLeft: index === 0 ? '4px solid #fff' : '4px solid transparent',
               }}
               onMouseEnter={(e) => {
-                if (activeSection !== item.section) e.currentTarget.style.backgroundColor = '#1a1a1a';
+                if (index !== 0) e.currentTarget.style.backgroundColor = '#1a1a1a';
               }}
               onMouseLeave={(e) => {
-                if (activeSection !== item.section) e.currentTarget.style.backgroundColor = 'transparent';
+                if (index !== 0) e.currentTarget.style.backgroundColor = 'transparent';
               }}
             >
               <span style={{ fontSize: '20px', flexShrink: 0 }}>{item.icon}</span>
@@ -305,23 +369,6 @@ export const HomePage: React.FC = () => {
         transition: 'margin-left 0.3s ease',
         padding: '40px',
       }}>
-        {/* Renderizar según la sección activa */}
-        {activeSection === 'dashboard' && renderDashboard()}
-        {activeSection === 'rutinas' && renderRutinas()}
-        {activeSection === 'clases' && renderClases()}
-        {activeSection === 'nutricion' && renderNutricion()}
-        {activeSection === 'progreso' && renderComingSoon('Progreso', '📊', 'Tu rendimiento y estadísticas')}
-        {activeSection === 'notificaciones' && renderComingSoon('Notificaciones', '🔔', 'Alertas y recordatorios')}
-        {activeSection === 'recomendaciones' && renderRecommendation()}
-        {activeSection === 'configuracion' && renderComingSoon('Configuración', '⚙️', 'Ajustes de tu cuenta')}
-      </div>
-    </div>
-  );
-
-  // Renderizar Dashboard
-  function renderDashboard() {
-    return (
-      <>
         {/* Header */}
         <div style={{ marginBottom: '40px' }}>
           <h1 style={{
@@ -370,245 +417,348 @@ export const HomePage: React.FC = () => {
           ))}
         </div>
 
-        {/* Quick Access Cards */}
+        {/* Widgets Grid */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '20px',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+          gap: '24px',
         }}>
-          {/* Widget completo de Rutinas */}
+          {/* Widget de Rutinas */}
           <div style={{
             backgroundColor: '#fff',
-            borderRadius: '8px',
+            borderRadius: '12px',
             border: '1px solid #e0e0e0',
             overflow: 'hidden',
-            cursor: 'pointer',
+            transition: 'box-shadow 0.2s',
           }}
-            onClick={() => setActiveSection('rutinas')}
+          onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'}
+          onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
           >
-            <RoutineWidget userId={currentUser || 'guest'} compact={true} onNavigate={() => setActiveSection('rutinas')} />
+            <RoutineWidget userId={currentUser || 'guest'} compact={true} onNavigate={() => navigate('/routines')} />
           </div>
 
-          <div
-            style={{
-              backgroundColor: '#fff',
-              borderRadius: '8px',
-              border: '1px solid #e0e0e0',
-              overflow: 'hidden',
-              cursor: 'pointer',
-            }}
-            onClick={() => setActiveSection('clases')}
+          {/* Widget de Clases */}
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            border: '1px solid #e0e0e0',
+            overflow: 'hidden',
+            transition: 'box-shadow 0.2s',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'}
+          onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
           >
             <ClassWidget userId={currentUser || 'guest'} compact={true} />
           </div>
 
-          <div
-            style={{
-              backgroundColor: '#fff',
-              borderRadius: '8px',
-              border: '1px solid #e0e0e0',
-              overflow: 'hidden',
-              cursor: 'pointer',
-            }}
-            onClick={() => setActiveSection('nutricion')}
-          >
-            <NutritionWidget userId={currentUser || 'guest'} compact={true} onNavigate={() => setActiveSection('nutricion')} />
-
-          </div>
-
-          <div
-            style={{
-              backgroundColor: '#fff',
-              borderRadius: '8px',
-              border: '1px solid #e0e0e0',
-              overflow: 'hidden',
-              cursor: 'pointer',
-            }}
-            onClick={() => setActiveSection('recomendaciones')}
-          >
-            <RecommendationWidget userId={currentUser || 'guest'} />
-          </div>
-          
-        </div>
-      </>
-    );
-  }
-
-  // Renderizar página completa de Rutinas
-  function renderRutinas() {
-    return (
-      <>
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{
-            fontSize: '32px',
-            fontWeight: '700',
-            color: '#000',
-            marginBottom: '8px',
-          }}>
-            Mis Rutinas
-          </h1>
-          <p style={{ fontSize: '16px', color: '#666' }}>
-            Gestiona tus rutinas de entrenamiento
-          </p>
-        </div>
-
-        <div style={{
-          backgroundColor: '#fff',
-          borderRadius: '12px',
-          border: '1px solid #e0e0e0',
-          overflow: 'hidden',
-          minHeight: '600px',
-        }}>
-          <RoutineWidget userId={currentUser || 'guest'} />
-        </div>
-      </>
-    );
-  }
-
-  function renderClases() {
-    return (
-      <>
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{
-            fontSize: '32px',
-            fontWeight: '700',
-            color: '#000',
-            marginBottom: '8px',
-          }}>
-            Clases Grupales
-          </h1>
-          <p style={{ fontSize: '16px', color: '#666' }}>
-            Reserva y gestiona tus clases
-          </p>
-        </div>
-
-        <div style={{
-          backgroundColor: '#fff',
-          borderRadius: '12px',
-          border: '1px solid #e0e0e0',
-          overflow: 'hidden',
-          minHeight: '600px',
-        }}>
-          <ClassWidget userId={currentUser || 'guest'} />
-        </div>
-      </>
-    );
-  }
-
-  function renderNutricion() {
-    return (
-      <>
-        <div style={{ marginBottom: '32px' }}>
-          <h1
-            style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#000',
-              marginBottom: '8px',
-            }}
-          >
-            Nutrición
-          </h1>
-          <p style={{ fontSize: '16px', color: '#666' }}>
-            Tu plan alimenticio personalizado
-          </p>
-        </div>
-
-        <div
-          style={{
+          {/* Widget de Nutrición */}
+          <div style={{
             backgroundColor: '#fff',
             borderRadius: '12px',
             border: '1px solid #e0e0e0',
-            padding: '24px',
+            overflow: 'hidden',
+            transition: 'box-shadow 0.2s',
           }}
-        >
-          <NutritionWidget userId={currentUser || 'guest'} />
-        </div>
-      </>
-    );
-  }
-
-  function renderRecommendation() {
-    return (
-      <>
-        <div style={{ marginBottom: '32px' }}>
-          <h1
-            style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#000',
-              marginBottom: '8px',
-            }}
+          onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'}
+          onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
           >
-            Recomendaciones
-          </h1>
-          <p style={{ fontSize: '16px', color: '#666' }}>
-            Basado en tu progreso
-          </p>
-        </div>
+            <NutritionWidget userId={currentUser || 'guest'} compact={true} onNavigate={() => navigate('/nutrition')} />
+          </div>
 
-        <div
-          style={{
-            backgroundColor: '#fff',
-            borderRadius: '12px',
-            border: '1px solid #e0e0e0',
-            padding: '24px',
-          }}
-        >
-          <RecommendationWidget userId={currentUser || 'guest'} />
-        </div>
-      </>
-    );
-  }
+          {/* Widget de Notificaciones */}
+          <div
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: '12px',
+              border: '1px solid #e0e0e0',
+              overflow: 'hidden',
+              transition: 'box-shadow 0.2s',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
+          >
+            {/* Notifications Header */}
+            <div style={{
+              padding: '20px 24px',
+              borderBottom: '1px solid #f0f0f0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              backgroundColor: '#111',
+              color: '#fff',
+            }}>
+              <div style={{ fontSize: '24px' }}>🔔</div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: '#fff',
+                  marginBottom: '2px',
+                }}>
+                  Notificaciones
+                </h3>
+                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', margin: 0 }}>
+                  Alertas y recordatorios
+                </p>
+              </div>
+              {unreadCount > 0 && (
+                <div style={{
+                  backgroundColor: '#ef4444',
+                  color: '#fff',
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  padding: '4px 10px',
+                  borderRadius: '12px',
+                  minWidth: '24px',
+                  textAlign: 'center',
+                }}>
+                  {unreadCount}
+                </div>
+              )}
+            </div>
 
-  // Renderizar páginas "Próximamente"
-  function renderComingSoon(title: string, icon: string, description: string) {
-    return (
-      <>
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{
-            fontSize: '32px',
-            fontWeight: '700',
-            color: '#000',
-            marginBottom: '8px',
-          }}>
-            {title}
-          </h1>
-          <p style={{ fontSize: '16px', color: '#666' }}>
-            {description}
-          </p>
-        </div>
+            {/* Notifications Content */}
+            <div style={{
+              padding: notifications.length > 0 ? '0' : '24px',
+              minHeight: '120px',
+              display: 'flex',
+              alignItems: notifications.length > 0 ? 'stretch' : 'center',
+              justifyContent: 'center',
+              backgroundColor: '#fafafa',
+            }}>
+              {notifications.length > 0 ? (
+                <div style={{ width: '100%' }}>
+                  {notifications.slice(0, 3).map((notification, nIndex) => (
+                    <div
+                      key={notification.id}
+                      style={{
+                        padding: '16px 24px',
+                        borderBottom: nIndex < Math.min(notifications.length, 3) - 1 ? '1px solid #f0f0f0' : 'none',
+                        display: 'flex',
+                        gap: '12px',
+                        alignItems: 'flex-start',
+                        backgroundColor: notification.read ? '#fafafa' : '#fff',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s',
+                      }}
+                      onClick={() => navigate('/notifications')}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = notification.read ? '#fafafa' : '#fff'}
+                    >
+                      <div style={{ fontSize: '20px', flexShrink: 0 }}>
+                        {getTypeIcon(notification.type)}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '4px' }}>
+                          <div style={{
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#000',
+                            lineHeight: '1.4',
+                            flex: 1,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}>
+                            {notification.title}
+                          </div>
+                          {!notification.read && (
+                            <div style={{
+                              width: '8px',
+                              height: '8px',
+                              backgroundColor: '#3b82f6',
+                              borderRadius: '50%',
+                              flexShrink: 0,
+                              marginTop: '4px',
+                            }} />
+                          )}
+                        </div>
+                        <p style={{
+                          fontSize: '13px',
+                          color: '#666',
+                          lineHeight: '1.4',
+                          margin: '0 0 6px 0',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {notification.message}
+                        </p>
+                        <span style={{
+                          fontSize: '12px',
+                          color: '#999',
+                        }}>
+                          {formatTimeAgo(notification.created_at)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{
+                  textAlign: 'center',
+                  color: '#999',
+                  fontSize: '14px',
+                  padding: '24px',
+                }}>
+                  <div style={{ fontSize: '40px', marginBottom: '12px', opacity: 0.3 }}>
+                    🔔
+                  </div>
+                  <div>No hay notificaciones</div>
+                </div>
+              )}
+            </div>
 
-        <div style={{
-          backgroundColor: '#fff',
-          borderRadius: '12px',
-          border: '1px solid #e0e0e0',
-          padding: '80px 40px',
-          textAlign: 'center',
-        }}>
-          <div style={{ fontSize: '80px', marginBottom: '24px', opacity: 0.3 }}>{icon}</div>
-          <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '12px' }}>
-            Próximamente
-          </h2>
-          <p style={{ color: '#666', maxWidth: '400px', margin: '0 auto' }}>
-            Esta sección está en desarrollo. Pronto podrás acceder a todas las funcionalidades de {title.toLowerCase()}.
-          </p>
+            {/* Notifications Footer */}
+            <div style={{
+              padding: '16px 24px',
+              backgroundColor: '#f8f9fa',
+              borderTop: '1px solid #f0f0f0',
+            }}>
+              <button
+                onClick={() => navigate('/notifications')}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#000',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#000';
+                  e.currentTarget.style.color = '#fff';
+                  e.currentTarget.style.borderColor = '#000';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#000';
+                  e.currentTarget.style.borderColor = '#e0e0e0';
+                }}
+              >
+                Ver todas →
+              </button>
+            </div>
+          </div>
+
+          {/* Widget de Recomendaciones */}
+          <div
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: '12px',
+              border: '1px solid #e0e0e0',
+              overflow: 'hidden',
+              transition: 'box-shadow 0.2s',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
+            onClick={() => navigate('/recommendations')}
+          >
+            {/* Recommendations Header */}
+            <div style={{
+              padding: '20px 24px',
+              background: 'linear-gradient(135deg, #111, #333)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            }}>
+              <div style={{ fontSize: '24px' }}>✨</div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: '#fff',
+                  marginBottom: '2px',
+                }}>
+                  Recomendaciones con IA
+                </h3>
+                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', margin: 0 }}>
+                  Sugerencias personalizadas
+                </p>
+              </div>
+            </div>
+
+            {/* Recommendations Content */}
+            <div style={{ padding: '24px' }}>
+              <p style={{
+                fontSize: '14px',
+                color: '#444',
+                lineHeight: 1.6,
+                marginBottom: '18px',
+              }}>
+                Obtén rutinas de entrenamiento y planes nutricionales generados con inteligencia artificial, adaptados a tus metas.
+              </p>
+
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                marginBottom: '16px',
+              }}>
+                <div style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>💪</div>
+                  <div style={{ fontSize: '12px', color: '#666' }}>Rutinas</div>
+                </div>
+                <div style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🥗</div>
+                  <div style={{ fontSize: '12px', color: '#666' }}>Nutrición</div>
+                </div>
+                <div style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                }}>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>🎯</div>
+                  <div style={{ fontSize: '12px', color: '#666' }}>Metas</div>
+                </div>
+              </div>
+
+              <div style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '8px',
+                background: '#000',
+                color: '#fff',
+                fontWeight: 600,
+                textAlign: 'center',
+                fontSize: '14px',
+              }}>
+                Obtener recomendaciones →
+              </div>
+            </div>
+          </div>
         </div>
-      </>
-    );
-  }
+      </div>
+    </div>
+  );
 };
 
-// Datos del menú
-const menuItems: { icon: string; label: string; section: Section }[] = [
-  { icon: '🏠', label: 'Dashboard', section: 'dashboard' },
-  { icon: '💪', label: 'Mis Rutinas', section: 'rutinas' },
-  { icon: '🎯', label: 'Clases', section: 'clases' },
-  { icon: '🥗', label: 'Nutrición', section: 'nutricion' },
-  { icon: '📊', label: 'Progreso', section: 'progreso' },
-  { icon: '🔔', label: 'Notificaciones', section: 'notificaciones' },
-  { icon: '⚙️', label: 'Configuración', section: 'configuracion' },
-  { icon: '⚙️', label: 'Recomendaciones', section: 'recomendaciones' }
+// Datos del menú con rutas
+const menuItems = [
+  { icon: '🏠', label: 'Dashboard', route: '/' },
+  { icon: '💪', label: 'Mis Rutinas', route: '/routines' },
+  { icon: '🎯', label: 'Clases', route: '/classes' },
+  { icon: '🥗', label: 'Nutrición', route: '/nutrition' },
+  { icon: '✨', label: 'Recomendaciones', route: '/recommendations' },
+  { icon: '🔔', label: 'Notificaciones', route: '/notifications' },
 ];
 
 // Tarjetas de estadísticas
