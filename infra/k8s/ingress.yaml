@@ -103,3 +103,12 @@ spec:
                 name: notification-service
                 port:
                   number: 3006
+          
+          # Notification Service
+          - path: /saga(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: saga-orchestrator
+                port:
+                  number: 3005

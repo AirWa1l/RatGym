@@ -31,7 +31,7 @@ Write-Host "🐳 Construyendo recommendation-service..." -ForegroundColor Yellow
 docker build -t ratgym/recommendations-service:latest ./apps/recommendation-service
 
 Write-Host "🐳 Construyendo shell (frontend)..." -ForegroundColor Yellow
-docker build -t ratgym/shell:latest ./apps/frontend/shell
+docker build -t ratgym/shell:latest ./apps/shell
 
 # ===============================
 # 📦 Verificar imágenes
@@ -44,7 +44,7 @@ docker images | Select-String ratgym
 # 🚀 Deploy Kubernetes
 # ===============================
 
-Write-Host "🚀 Desplegando ConfigMaps y RabbitMQ..." -ForegroundColor Yellow
+Write-Host "`n🚀 Desplegando ConfigMaps y RabbitMQ..." -ForegroundColor Yellow
 kubectl apply -f infra/k8s/configmap.yaml
 kubectl apply -f infra/k8s/services/rabbitmq.yaml
 
@@ -53,30 +53,60 @@ Start-Sleep -Seconds 15
 Write-Host "🚀 Desplegando microservicios..." -ForegroundColor Yellow
 kubectl apply -f infra/k8s/deployments/
 
+Write-Host "⏳ Esperando 10 segundos para que los deployments se actualicen..." -ForegroundColor Gray
+Start-Sleep -Seconds 10
+
+Write-Host "🔄 Forzando recreación de pods para usar nuevas imágenes..." -ForegroundColor Yellow
+kubectl delete pods -l app=saga-orchestrator --ignore-not-found=true
+kubectl delete pods -l app=shell --ignore-not-found=true
+
 # ===============================
 # 🤖 Deploy IA - LLaMA (Ollama)
 # ===============================
 
-Write-Host "🤖 Desplegando LLaMA Service..." -ForegroundColor Magenta
+Write-Host "`n🤖 Desplegando LLaMA Service..." -ForegroundColor Magenta
 kubectl apply -f infra/k8s/deployments/llama-service.yaml
-
+Write-Host "`n🔌 Desplegando Ingress..." -ForegroundColor Cyan
+kubectl apply -f infra/k8s/ingress.yaml
 # ===============================
-# 📊 Estado
+# � Estado
 # ===============================
 
-Write-Host "📊 Estado de los pods:" -ForegroundColor Cyan
+Write-Host "`n📊 Estado de los pods:" -ForegroundColor Cyan
 kubectl get pods
 
 # ===============================
-# 🌐 Accesos
+# 🚀 INICIO RÁPIDO
 # ===============================
 
-Write-Host "`n🌐 Para acceder a los servicios:" -ForegroundColor Green
-Write-Host "kubectl port-forward svc/shell 3000:3000" -ForegroundColor White
-Write-Host "kubectl port-forward svc/user-service 3001:3001" -ForegroundColor White
-Write-Host "kubectl port-forward svc/routine-service 3002:3002" -ForegroundColor White
-Write-Host "kubectl port-forward svc/class-service 3003:3003" -ForegroundColor White
-Write-Host "kubectl port-forward svc/nutrition-service 3004:3004" -ForegroundColor White
-Write-Host "kubectl port-forward svc/saga-orchestrator 3005:3005" -ForegroundColor White
-Write-Host "kubectl port-forward svc/notification-service 3006:3006" -ForegroundColor White
-Write-Host "kubectl port-forward svc/llama-service 11434:11434" -ForegroundColor White
+Write-Host "`n🚀 ACCEDER A LA APLICACIÓN:" -ForegroundColor Green
+Write-Host "============================================" -ForegroundColor Green
+Write-Host ""
+Write-Host "Opción 1 - Todos los servicios (Recomendado):" -ForegroundColor Cyan
+Write-Host "  .\port-forward.ps1" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Opción 2 - Solo Frontend:" -ForegroundColor Cyan
+Write-Host "  kubectl port-forward svc/shell 3000:3000" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Luego abre: http://localhost:3000" -ForegroundColor Green
+
+# ===============================
+# 📊 Herramientas Adicionales
+# ===============================
+
+Write-Host "`n📊 RabbitMQ Management:" -ForegroundColor Cyan
+Write-Host "  kubectl port-forward svc/rabbitmq 15672:15672" -ForegroundColor Yellow
+Write-Host "  http://localhost:15672 (guest/guest)" -ForegroundColor White
+
+Write-Host "`n🎭 Saga Orchestrator API:" -ForegroundColor Magenta
+Write-Host "  kubectl port-forward svc/saga-orchestrator 3005:3005" -ForegroundColor Yellow
+Write-Host "  http://localhost:3005/saga" -ForegroundColor White
+
+Write-Host "`n✅ Deploy completado!" -ForegroundColor Green
+
+# ===============================
+# 🗑️ Limpiar Recursos
+# ===============================
+
+Write-Host "`n🗑️  Para limpiar y eliminar todos los recursos:" -ForegroundColor Red
+Write-Host "  .\destructor.ps1" -ForegroundColor Yellow

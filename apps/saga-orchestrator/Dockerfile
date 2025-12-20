@@ -9,7 +9,7 @@ COPY tsconfig.json ./
 COPY nest-cli.json ./
 
 # Instalar todas las dependencias
-RUN npm ci
+RUN npm install
 
 # Copiar código fuente
 COPY src ./src
@@ -26,7 +26,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instalar solo dependencias de producción
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # Copiar el código compilado
 COPY --from=builder /app/dist ./dist

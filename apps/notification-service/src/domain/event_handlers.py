@@ -29,9 +29,19 @@ def handle_event(event: Dict) -> Optional[Dict]:
         return {
             "user_id": data.get("user_id"),
             "title": "Nueva rutina asignada 💪",
-            "message": f"Se ha creado tu rutina '{data.get('routine_name', 'personalizada')}' de {data.get('duration_days', 7)} días. ¡Es hora de entrenar!",
+            "message": f"Se ha creado tu rutina '{data.get('routine_name', 'personalizada')}' ({data.get('difficulty', 'intermedio')}) con {data.get('exercises_count', 0)} ejercicios. Duración estimada: {data.get('duration_minutes', 60)} minutos. ¡Es hora de entrenar!",
             "type": "ROUTINE_ASSIGNED",
             "priority": "HIGH",
+            "metadata": data
+        }
+    
+    if event_type == "routine.completed":
+        return {
+            "user_id": data.get("user_id"),
+            "title": "¡Entrenamiento completado! 🎖️",
+            "message": f"Excelente trabajo completando la rutina '{data.get('routine_name', '')}'. Has completado esta rutina {data.get('times_completed', 1)} veces. ¡Sigue así!",
+            "type": "ROUTINE_COMPLETED",
+            "priority": "MEDIUM",
             "metadata": data
         }
     
@@ -42,16 +52,6 @@ def handle_event(event: Dict) -> Optional[Dict]:
             "message": f"Esta es tu rutina de hoy: {data.get('exercises', 'Revisa tu plan de entrenamiento')}. ¡Dale con todo!",
             "type": "DAILY_ROUTINE",
             "priority": "HIGH",
-            "metadata": data
-        }
-    
-    if event_type == "routine.completed":
-        return {
-            "user_id": data.get("user_id"),
-            "title": "¡Entrenamiento completado! 🎖️",
-            "message": f"Excelente trabajo completando tu rutina del día {data.get('day_number', '')}. Sigue así!",
-            "type": "ROUTINE_COMPLETED",
-            "priority": "MEDIUM",
             "metadata": data
         }
     
@@ -70,7 +70,7 @@ def handle_event(event: Dict) -> Optional[Dict]:
         return {
             "user_id": data.get("user_id"),
             "title": "Plan nutricional disponible 🥗",
-            "message": f"Tu plan nutricional de {data.get('calories', '2000')} calorías está listo. ¡A comer saludable!",
+            "message": f"Tu plan nutricional está listo: {data.get('calories', '2000')} calorías diarias ({data.get('protein', 0)}g proteína, {data.get('carbs', 0)}g carbohidratos, {data.get('fat', 0)}g grasas). Objetivo: {data.get('objective', 'mantener peso').replace('_', ' ').lower()}. ¡A comer saludable!",
             "type": "NUTRITION_PLAN",
             "priority": "HIGH",
             "metadata": data
@@ -97,13 +97,44 @@ def handle_event(event: Dict) -> Optional[Dict]:
         }
     
     # === EVENTOS DE CLASES ===
+    # === EVENTOS DE CLASES ===
     if event_type == "class.scheduled":
         return {
             "user_id": data.get("user_id"),
-            "title": "Clase programada 📅",
-            "message": f"Tienes una clase de {data.get('class_name', 'fitness')} programada para el {data.get('date', 'próximo día')} a las {data.get('time', 'hora asignada')}",
-            "type": "CLASS_REMINDER",
+            "title": "Nueva clase disponible 📅",
+            "message": f"Clase de {data.get('class_name', 'fitness')} con {data.get('instructor', 'instructor')} programada para el {data.get('date', 'próximo día')} a las {data.get('start_time', 'hora asignada')}. Duración: {data.get('duration', 60)} minutos.",
+            "type": "CLASS_SCHEDULED",
+            "priority": "MEDIUM",
+            "metadata": data
+        }
+    
+    if event_type == "class.booked":
+        return {
+            "user_id": data.get("user_id"),
+            "title": "Reserva confirmada ✅",
+            "message": f"Has reservado tu lugar en la clase de {data.get('class_name', 'fitness')} con {data.get('instructor', 'instructor')} el {data.get('date', 'próximo día')} a las {data.get('start_time', 'hora programada')}. ¡Te esperamos!",
+            "type": "CLASS_BOOKED",
             "priority": "HIGH",
+            "metadata": data
+        }
+    
+    if event_type == "class.cancelled":
+        return {
+            "user_id": data.get("user_id"),
+            "title": "Reserva cancelada ❌",
+            "message": f"Has cancelado tu reserva para la clase de {data.get('class_name')} del {data.get('date', 'día programado')} a las {data.get('start_time', 'hora')}.",
+            "type": "CLASS_CANCELLED",
+            "priority": "MEDIUM",
+            "metadata": data
+        }
+    
+    if event_type == "class.attended":
+        return {
+            "user_id": data.get("user_id"),
+            "title": "¡Asistencia registrada! 🎉",
+            "message": f"Excelente trabajo en la clase de {data.get('class_name', 'fitness')} con {data.get('instructor', 'instructor')}. Sigue así!",
+            "type": "CLASS_ATTENDED",
+            "priority": "MEDIUM",
             "metadata": data
         }
     
@@ -113,16 +144,6 @@ def handle_event(event: Dict) -> Optional[Dict]:
             "title": "Recordatorio de clase ⏰",
             "message": f"Tu clase de {data.get('class_name')} comienza en {data.get('minutes_before', 30)} minutos. ¡Prepárate!",
             "type": "CLASS_REMINDER",
-            "priority": "HIGH",
-            "metadata": data
-        }
-    
-    if event_type == "class.cancelled":
-        return {
-            "user_id": data.get("user_id"),
-            "title": "Clase cancelada ❌",
-            "message": f"La clase de {data.get('class_name')} ha sido cancelada. {data.get('reason', 'Consulta nuevas disponibilidades.')}",
-            "type": "CLASS_CANCELLED",
             "priority": "HIGH",
             "metadata": data
         }

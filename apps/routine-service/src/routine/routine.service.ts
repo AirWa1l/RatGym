@@ -1,5 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
+import { RabbitMQService } from '../rabbitmq/rabbitmq.service';
 import {
   Routine,
   RoutineExercise,
@@ -16,7 +17,10 @@ export class RoutineService {
   private routines: Map<string, Routine> = new Map();
   private completionHistory: Map<string, { date: Date; routineId: string }[]> = new Map();
 
-  constructor(private readonly exerciseService: ExerciseService) {
+  constructor(
+    private readonly exerciseService: ExerciseService,
+    private readonly rabbitMQService: RabbitMQService,
+  ) {
     this.seedRoutines();
   }
 
@@ -209,6 +213,17 @@ export class RoutineService {
     this.routines.set(id, routine);
     this.logger.log(`Created routine: ${routine.name} for user ${routine.userId}`);
 
+    // Emitir evento de rutina creada
+    this.rabbitMQService.publishEvent('routine.created', {
+      user_id: routine.userId,
+      routine_id: routine.id,
+      routine_name: routine.name,
+      difficulty: routine.difficulty,
+      category: routine.category,
+      duration_minutes: routine.estimatedDuration,
+      exercises_count: routine.exercises.length,
+    });
+
     return routine;
   }
 
@@ -316,6 +331,18 @@ export class RoutineService {
     this.completionHistory.set(userId, userHistory);
 
     this.logger.log(`Routine ${routine.name} completed by user ${userId}`);
+
+    // Emitir evento de rutina completada
+    this.rabbitMQService.publishEvent('routine.completed', {
+      user_id: userId,
+      routine_id: routine.id,
+      routine_name: routine.name,
+      difficulty: routine.difficulty,
+      category: routine.category,
+      times_completed: routine.timesCompleted,
+      exercises_count: routine.exercises.length,
+    });
+
     return routine;
   }
 

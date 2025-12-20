@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 load_dotenv()
 
 # Importaciones de tu estructura de carpetas
-from src.api.routes import notifications, health
+from src.api.routes import notifications, health, reminders
 # Cambiamos el nombre importado para que coincida con tu clase
 from src.messaging.rabbitmq_client import RabbitMQConsumer 
 
@@ -31,6 +31,7 @@ app.add_middleware(
 
 # Registro de Rutas
 app.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
+app.include_router(reminders.router, tags=["Reminders"])
 app.include_router(health.router, prefix="/health", tags=["Health"])
 
 @app.get("/")
