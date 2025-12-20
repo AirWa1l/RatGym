@@ -1,0 +1,143 @@
+body {
+    margin: 0;
+    height: 100vh;
+    background: #333333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: system-ui, sans-serif;
+}
+
+/* Contenedor principal */
+.chat-container {
+    width: 420px;
+    height: 600px;
+    background: #fff;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+/* Chat */
+#chat {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    background: #fafafa;
+}
+
+/* Mensajes */
+.message {
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    max-width: 85%;
+    line-height: 1.4;
+    font-size: 14px;
+}
+
+.message.user {
+    background: #111;
+    color: #fff;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+}
+
+.message.ai {
+    background: #e4e4e4;
+    color: #111;
+    border-bottom-left-radius: 4px;
+}
+
+.message.error {
+    background: #f1f1f1;
+    border-left: 4px solid #444;
+    color: #333;
+}
+
+/* Loader */
+.loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    font-size: 13px;
+    color: #555;
+}
+
+.hidden {
+    display: none;
+}
+
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 3px solid #ccc;
+    border-top: 3px solid #111;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Botones */
+.actions {
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid #ddd;
+    background: #fff;
+}
+
+.actions button {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 20px;
+    padding: 8px 10px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.actions button:hover {
+    background: #111;
+    color: #fff;
+}
+
+/* Scrollbar limpio */
+#chat::-webkit-scrollbar {
+    width: 6px;
+}
+#chat::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.preferences {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ddd;
+    background: #fff;
+}
+
+.preferences h4 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: #444;
+}
+
+.preferences label {
+    display: block;
+    font-size: 13px;
+    color: #222;
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
+.preferences input {
+    margin-right: 6px;
+}

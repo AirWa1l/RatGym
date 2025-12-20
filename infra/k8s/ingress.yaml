@@ -1,0 +1,114 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ratgym-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: ratgym.local
+      http:
+        paths:
+          # API Gateway
+          - path: /api(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 3000
+
+          # User Service (direct access for development)
+          - path: /user-service(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: user-service
+                port:
+                  number: 3001
+
+          # Saga Orchestrator (direct access for monitoring)
+          - path: /saga(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: saga-orchestrator
+                port:
+                  number: 3005
+
+          # Routine Service (exercises and routines)
+          - path: /routines(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: routine-service
+                port:
+                  number: 3002
+
+          # Routine Service - Exercises endpoint
+          - path: /exercises(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: routine-service
+                port:
+                  number: 3002
+
+          # Class Service (classes and bookings)
+          - path: /classes(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: class-service
+                port:
+                  number: 3003
+
+          # Frontend - Shell (Main Dashboard)
+          - path: /(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: shell
+                port:
+                  number: 3000
+
+          # Nutrition Service
+          - path: /nutrition(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: nutrition-service
+                port:
+                  number: 3004
+
+          # Recommendation Service
+          - path: /recommendation(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: recommendation-service
+                port:
+                  number: 3007
+
+          # Notification Service
+          - path: /notifications(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: notification-service
+                port:
+                  number: 3006
+          
+          # Notification Service
+          - path: /saga(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: saga-orchestrator
+                port:
+                  number: 3005

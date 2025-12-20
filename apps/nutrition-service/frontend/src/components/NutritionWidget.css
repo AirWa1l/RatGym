@@ -1,0 +1,84 @@
+.nutrition-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  text-align: left;
+}
+
+.nutrition-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nutrition-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.nutrition-subtitle {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.nutrition-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.nutrition-form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.nutrition-form input,
+.nutrition-form select {
+  margin-top: 0.25rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.85rem;
+}
+
+.nutrition-button {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: none;
+  background: #111827;
+  color: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.nutrition-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.nutrition-result {
+  margin-top: 1.25rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+  color: #111827; 
+}
+
+
+.nutrition-metric {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+}
+
+.nutrition-recommendation {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: #374151;
+}

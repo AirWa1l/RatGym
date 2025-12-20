@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: class-service
+  labels:
+    app: class-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: class-service
+  template:
+    metadata:
+      labels:
+        app: class-service
+    spec:
+      containers:
+      - name: class-service
+        image: ratgym/class-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3003
+        env:
+        - name: PORT
+          value: "3003"
+        - name: NODE_ENV
+          value: "production"
+        - name: RABBITMQ_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ratgym-config
+              key: RABBITMQ_URL
+        - name: RABBITMQ_QUEUE
+          valueFrom:
+            configMapKeyRef:
+              name: ratgym-config
+              key: CLASS_SERVICE_QUEUE
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3003
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3003
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: class-service
+  labels:
+    app: class-service
+spec:
+  selector:
+    app: class-service
+  ports:
+    - protocol: TCP
+      port: 3003
+      targetPort: 3003
+      name: http
+  type: ClusterIP

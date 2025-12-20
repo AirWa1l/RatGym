@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendation-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: recommendation-service
+  template:
+    metadata:
+      labels:
+        app: recommendation-service
+    spec:
+      containers:
+        - name: recommendation-service
+          image: ratgym/recommendation-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3007
+          env:
+            # Gemini API Key
+            - name: GEMINI_API_KEY
+              value: "AIzaSyDsXzEI2SEe2Xnc1C0uJG996klhY_G7uhE"
+
+            # RabbitMQ
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
+
+            # Python/Flask
+            - name: FLASK_ENV
+              value: production
+            - name: PYTHONUNBUFFERED
+              value: "1"
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: recommendation-service
+spec:
+  selector:
+    app: recommendation-service
+  ports:
+    - port: 3007
+      targetPort: 3007
+  type: ClusterIP
